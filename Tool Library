@@ -80,7 +80,7 @@ do
 		end
 	end
 	
-	function PlayerValid(Player, Char)
+	function Funcs:PlayerValid(Player, Char)
 		return Player and Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 0
 	end
 end
