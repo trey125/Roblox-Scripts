@@ -71,6 +71,12 @@ do
 	function Funcs:Round(n)
 		return math.round(n*100)/100
 	end
+	
+	function Funcs:RemoveFromTable(Table, Item)
+		for Idx,Val in pairs(Table) do
+			if v == Item then table.remove(Table, i) end
+		end
+	end
 end
 
 return Funcs
