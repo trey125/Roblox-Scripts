@@ -28,9 +28,9 @@ do
 	function Funcs:Start()
 		pcall(function() 
 			task.spawn(function()
-				Funcs:addConn(_G.Vars.l_Player.CharacterAdded, function(char)
-					_G.Vars.l_Char = char
-					_G.Vars.l_HRP = _G.Vars.l_Char:WaitForChild('HumanoidRootPart', 5)
+				Funcs:addConn(_G.Globals.l_Player.CharacterAdded, function(char)
+					_G.Globals.l_Char = char
+					_G.Globals.l_HRP = _G.Globals.l_Globals:WaitForChild('HumanoidRootPart', 5)
 				end)
 			end) 
 		end)
