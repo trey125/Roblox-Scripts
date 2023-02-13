@@ -26,11 +26,13 @@ _G.Globals = {
 Funcs = {}
 do
 	function Funcs:Start()
-		task.spawn(function()
-			Funcs:addConn(_G.Vars.l_Player.CharacterAdded, function(char)
-				_G.Vars.l_Char = char
-				_G.Vars.l_HRP = _G.Vars.l_Char:WaitForChild('HumanoidRootPart', 5)
-			end)
+		pcall(function() 
+			task.spawn(function()
+				Funcs:addConn(_G.Vars.l_Player.CharacterAdded, function(char)
+					_G.Vars.l_Char = char
+					_G.Vars.l_HRP = _G.Vars.l_Char:WaitForChild('HumanoidRootPart', 5)
+				end)
+			end) 
 		end)
 	end
 	function Funcs:Destroy()
@@ -76,6 +78,10 @@ do
 		for Idx,Val in pairs(Table) do
 			if v == Item then table.remove(Table, i) end
 		end
+	end
+	
+	function PlayerValid(Player, Char)
+		return Player and Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 0
 	end
 end
 
