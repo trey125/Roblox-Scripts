@@ -1,0 +1,76 @@
+--// By Trey135421 \\--
+
+--if _G.Loaded then return warn('Script already injected, rejoin game.')
+--else _G.Loaded = true end
+
+--< Globals >--
+local Players = game:GetService('Players')
+local UIS = game:GetService('UserInputService')
+local RS = game:GetService('ReplicatedStorage')
+local RunService = game:GetService('RunService')
+
+--< Variables >--
+_G.Settings = {
+	Connections = {}
+}
+_G.Globals = {
+	l_Player = Players.LocalPlayer,
+	l_Char = Players.LocalPlayer.Character,
+	l_HRP = Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart', 5),
+	CurrentCamera = workspace.Camera,
+	Mouse = Players.LocalPlayer:GetMouse()
+}
+
+--< Functions >--
+
+Funcs = {}
+do
+	function Funcs:Start()
+		task.spawn(function()
+			Funcs:addConn(_G.Vars.l_Player.CharacterAdded, function(char)
+				_G.Vars.l_Char = char
+				_G.Vars.l_HRP = _G.Vars.l_Char:WaitForChild('HumanoidRootPart', 5)
+			end)
+		end)
+	end
+	function Funcs:Destroy()
+		for i,v in pairs(_G.Settings.Connections) do 
+      v:Disconnect()
+      v = nil
+    end
+	end
+
+	function Funcs:addSignal(object, property, func)
+		table.insert(_G.Settings.Connections, object:GetPropertyChangedSignal(property):Connect(func))
+	end
+	function Funcs:addConn(conn, func)
+		table.insert(_G.Settings.Connections, conn:Connect(func))
+	end
+	
+	function Funcs:GetDist(pos1, pos2)
+		return (pos1 - pos2)
+	end
+	function Funcs:GetMag(pos1, pos2)
+		return (pos1 - pos2).Magnitude
+	end
+	
+	function Funcs:GetAttr(o, a)
+		return o:GetAttribute(a)
+	end
+	function Funcs:GetAttr_ALL(o)
+		return o:GetAttributes()
+	end
+	function Funcs:SetAttr(o, a, v)
+		o:SetAttribute(a, v)
+	end
+	
+	function Funcs:W2S(pos)
+		return _G.Vars.CurrentCamera:WorldToViewportPoint(pos)
+	end
+	
+	function Funcs:Round(n)
+		return math.round(n*100)/100
+	end
+end
+
+return Funcs
