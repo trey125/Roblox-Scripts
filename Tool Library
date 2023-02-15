@@ -56,7 +56,7 @@ function Funcs:SetAttr(o, a, v)
 end
 
 function Funcs:W2S(pos)
-	return _G.Globals.CurrentCamera:WorldToViewportPoint(pos)
+	return _G.Local.CurrentCamera:WorldToViewportPoint(pos)
 end
 function Funcs:Round(num, dec)
 	local _split = tostring(num):split('.')
