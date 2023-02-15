@@ -182,7 +182,7 @@ function Funcs:Set(Name, Object, Prop)
 
 		local BoneTable = GetBones(Character)
 		if #BoneTable == 15 then
-			Funcs:SetLine(Table['Head'], BoneTable[1], BoneTable[3], Color)
+			Funcs:Set('Line', Table['Head'], { From = BoneTable[1], To = BoneTable[3], Color = Color })
 
 			Funcs:Set('Line', Table['RUA'], { From = BoneTable[2], To = BoneTable[4], Color = Color })
 			Funcs:Set('Line', Table['RLA'], { From = BoneTable[4], To = BoneTable[5], Color = Color })
