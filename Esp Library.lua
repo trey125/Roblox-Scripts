@@ -93,7 +93,7 @@ function Funcs:New(Name, Prop)
 		return SkeletonTable
 	end
 end
-function Set(Name, Object, Prop)
+function Funcs:Set(Name, Object, Prop)
 	if Name == 'Circle' then
 		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
 		Object.Visible = Prop.Visible or true
