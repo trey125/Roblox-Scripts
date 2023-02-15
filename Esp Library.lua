@@ -104,6 +104,8 @@ function Set(Name, Object, Prop)
 	elseif Name == 'Text' then
 		Object.Text = Prop.Text or ''
 		Object.Position = Prop.Position or Vector2.new(Prop.X, Prop.Y) or Vector2.zero
+		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
+		Object.Visible = Prop.Visible or true
 	elseif Name == 'Cham' then
 		Object.OutlineColor = Prop.OutlineColor
 		Object.FillColor = Prop.FillColor
