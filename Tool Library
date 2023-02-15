@@ -1,88 +1,86 @@
---// By Trey135421 \\--
+--< Create Tables >--
 
---if _G.Loaded then return warn('Script already injected, rejoin game.')
---else _G.Loaded = true end
+if not _G.Services then
+	_G.Services = {
+		WS = game:GetService('Workspace'),
+		Players = game:GetService('Players'),
+		RS = game:GetService('ReplicatedStorage'),
+		UIS = game:GetService('UserInputService'),
+		HttpService = game:GetService('HttpService'),
+		RunService = game:GetService('RunService'),
+		TweenService = game:GetService('TweenService')
+	}
+end
 
---< Globals >--
-local Players = game:GetService('Players')
-local UIS = game:GetService('UserInputService')
-local RS = game:GetService('ReplicatedStorage')
-local RunService = game:GetService('RunService')
-
---< Variables >--
-Settings = {
-	Connections = {}
+_G.Local = {
+	l_Player = _G.Services.Players.LocalPlayer,
+	l_Char = _G.Services.Players.LocalPlayer.Character,
+	l_HRP = _G.Services.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart', 5),
+	
+	Mouse = _G.Services.Players.LocalPlayer:GetMouse(),
+	Cam = workspace.Camera,
 }
-_G.Globals = {
-	l_Player = Players.LocalPlayer,
-	l_Char = Players.LocalPlayer.Character,
-	l_HRP = Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart', 5),
-	CurrentCamera = workspace.Camera,
-	Mouse = Players.LocalPlayer:GetMouse()
-}
+Connections = {}
 
 --< Functions >--
-
 Funcs = {}
-do
-	function Funcs:Start()
-		pcall(function() 
-			task.spawn(function()
-				Funcs:addConn(_G.Globals.l_Player.CharacterAdded, function(char)
-					_G.Globals.l_Char = char
-					_G.Globals.l_HRP = _G.Globals.l_Char:WaitForChild('HumanoidRootPart', 5)
-				end)
-			end) 
-		end)
-	end
-	function Funcs:Destroy()
-		for i,v in pairs(Settings.Connections) do 
-      v:Disconnect()
-      v = nil
-    end
-	end
 
-	function Funcs:addSignal(object, property, func)
-		table.insert(Settings.Connections, object:GetPropertyChangedSignal(property):Connect(func))
+function Funcs:RemoveFromTable(_table, item)
+	for i,v in pairs(_table) do
+		if v == item then table.remove(_table, i) end
 	end
-	function Funcs:addConn(conn, func)
-		table.insert(Settings.Connections, conn:Connect(func))
+end
+
+function Funcs:addConn(conn, func)
+	table.insert(Connections, conn:Connect(func))
+end
+function Funcs:addSignal(object, property, func)
+	table.insert(Connections, object:GetPropertyChangedSignal(property):Connect(func))
+end
+
+function Funcs:Dist(pos1, pos2)
+	return (pos1 - pos2)
+end
+function Funcs:Magnitude(pos1, pos2)
+	return Funcs:Dist(pos1, pos2).Magnitude
+end
+
+function Funcs:GetAttr(o, a)
+	return o:GetAttribute(a)
+end
+function Funcs:GetAttr_ALL(o)
+	return o:GetAttributes()
+end
+function Funcs:SetAttr(o, a, v)
+	o:SetAttribute(a, v)
+end
+
+function Funcs:W2S(pos)
+	return _G.Globals.CurrentCamera:WorldToViewportPoint(pos)
+end
+function Funcs:Round(num, dec)
+	local _split = tostring(num):split('.')
+	return tonumber(_split[1] .. '.' .. _split[2]:sub(1, dec))
+end
+
+function Funcs:PlayerValid(Player, Char)
+	return Player and _G.Services.Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 0
+end
+
+function Funcs:Start()
+	pcall(function()
+		Funcs:addConn(_G.Local.l_Player.CharacterAdded, function(char)
+			_G.Local.l_Char = char
+			_G.Local.l_HRP = _G.Local.l_Char:WaitForChild('HumanoidRootPart', 5)
+		end)
+	end)
+end
+function Funcs:Stop()
+	for i,v in pairs(Connections) do
+		v:Disconnect()
+		v = nil
 	end
-	
-	function Funcs:GetDist(pos1, pos2)
-		return (pos1 - pos2)
-	end
-	function Funcs:GetMag(pos1, pos2)
-		return (pos1 - pos2).Magnitude
-	end
-	
-	function Funcs:GetAttr(o, a)
-		return o:GetAttribute(a)
-	end
-	function Funcs:GetAttr_ALL(o)
-		return o:GetAttributes()
-	end
-	function Funcs:SetAttr(o, a, v)
-		o:SetAttribute(a, v)
-	end
-	
-	function Funcs:W2S(pos)
-		return _G.Globals.CurrentCamera:WorldToViewportPoint(pos)
-	end
-	
-	function Funcs:Round(n)
-		return math.round(n*100)/100
-	end
-	
-	function Funcs:RemoveFromTable(Table, Item)
-		for Idx,Val in pairs(Table) do
-			if v == Item then table.remove(Table, i) end
-		end
-	end
-	
-	function Funcs:PlayerValid(Player, Char)
-		return Player and Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 0
-	end
+	Connections = {}
 end
 
 return Funcs
