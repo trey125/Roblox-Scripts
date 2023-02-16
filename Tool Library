@@ -64,7 +64,7 @@ function Funcs:Round(num, dec)
 end
 
 function Funcs:PlayerValid(Player, Char)
-	return Player and _G.Services.Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 0
+	return Player and _G.Services.Players:FindFirstChild(Player.Name) and Char and Char:FindFirstChild('HumanoidRootPart') and Char:FindFirstChild('Humanoid') and Char:FindFirstChild('Humanoid').Health > 1
 end
 
 function Funcs:Start()
