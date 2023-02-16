@@ -98,6 +98,7 @@ function Funcs:Set(Name, Object, Prop)
 		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
 		Object.Visible = Prop.Visible or true
 	elseif Name == 'Line' then
+		Object.From = Vector2.new(Prop.From.X, Prop.From.Y) or Vector2.zero
 		Object.From = Prop.From or Vector2.new(Prop.FX, Prop.FY) or Vector2.new(Prop.From.X, Prop.From.Y) or Vector2.zero
 		Object.To = Prop.To or Vector2.new(Prop.TX, Prop.TY) or Vector2.new(Prop.To.X, Prop.To.Y) or Vector2.zero
 		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
