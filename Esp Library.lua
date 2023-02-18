@@ -102,7 +102,14 @@ function Funcs:New(Name, Prop)
 	end
 end
 function Funcs:Set(Name, Object, Prop)
-	if Name == 'Circle' then
+	if Name == 'Triangle' then
+		Object.Color = Prop.Color or Color3.fromRGB(0, 0, 0)
+		Object.PointA = Prop.PointA or Vector2.new(0, 0)
+		Object.PointB = Prop.PointB or Vector2.new(0, 0)
+		Object.PointC = Prop.PointC or Vector2.new(0, 0)
+		Object.Visible = Prop.Visible or true
+	end
+	elseif Name == 'Circle' then
 		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
 		Object.Visible = Prop.Visible or true
 	elseif Name == 'Line' then
