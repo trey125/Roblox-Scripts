@@ -108,7 +108,6 @@ function Funcs:Set(Name, Object, Prop)
 		Object.PointB = Prop.PointB or Vector2.new(0, 0)
 		Object.PointC = Prop.PointC or Vector2.new(0, 0)
 		Object.Visible = Prop.Visible or true
-	end
 	elseif Name == 'Circle' then
 		Object.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
 		Object.Visible = Prop.Visible or true
