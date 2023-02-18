@@ -30,7 +30,7 @@ function Funcs:New(Name, Prop)
 		c.NumSides = Prop.NumSides or 200
 		c.Radius = Prop.Radius or 60
 		c.Filled = Prop.Filled or false
-		c.Coor = Prop.Color or Color3.fromRGB(255, 255, 255)
+		c.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
 		table.insert(Drawables, c)
 		return c
 	elseif Name == 'Line' then
