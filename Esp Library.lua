@@ -23,7 +23,14 @@ function Funcs:Stop()
 end
 
 function Funcs:New(Name, Prop)
-	if Name == 'Circle' then
+	if Name == 'Triangle' then
+		local t = Drawing.new('Triangle')
+		t.Visible = Prop.Visible or false
+        	t.Thickness = Prop.Thickness or 1
+        	t.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
+        	t.Filled = Prop.Filled or false
+        	return t
+	elseif Name == 'Circle' then
 		local c = Drawing.new('Circle')
 		c.Visible = Prop.Visible or false
 		c.Thickness = Prop.Thickness or 1
