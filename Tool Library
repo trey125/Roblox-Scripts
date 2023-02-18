@@ -81,7 +81,7 @@ function Funcs:relative(pos, c)
     local camP = _G.Local.Cam.CFrame.Position
     local rel = CFrame.new(Vector3.new(rootP.X, camP.Y, rootP.Z), camP):PointToObjectSpace(pos)
     
-    return V2(rel.X, rel.Z)
+    return Vector2.new(rel.X, rel.Z)
 end
 function Funcs:relative_to_center(n)
     return _G.Local.Cam.ViewportSize / 2 - n
