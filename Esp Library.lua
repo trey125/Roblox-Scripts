@@ -29,6 +29,7 @@ function Funcs:New(Name, Prop)
         	t.Thickness = Prop.Thickness or 1
         	t.Color = Prop.Color or Color3.fromRGB(255, 255, 255)
         	t.Filled = Prop.Filled or false
+		table.insert(Drawables, t)
         	return t
 	elseif Name == 'Circle' then
 		local c = Drawing.new('Circle')
