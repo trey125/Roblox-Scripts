@@ -68,23 +68,23 @@ function Funcs:PlayerValid(Player, Char)
 end
 
 function Funcs:rotate(p, r)
-    r = RAD(r) -- math.rad / degrees * (pi / 180)
-    local x = p.x * COS(r) - p.y * SIN(r) -- trig
-    local y = p.x * SIN(r) + p.y * COS(r) -- trig
+    r = math.rad(r) -- math.rad / degrees * (pi / 180)
+    local x = p.x * math.cos(r) - p.y * math.sin(r) -- trig
+    local y = p.x * math.sin(r) + p.y * math.cos(r) -- trig
     
-    return V2(x, y)
+    return Vector2.new(x, y)
 end
 function Funcs:relative(pos, c)
-    if not c then return V2(0, 0) end
+    if not c then return Vector2.new(0, 0) end
     
     local rootP = c.PrimaryPart.Position
-    local camP = Vars.Cam.CFrame.Position
-    local rel = CF(V3(rootP.X, camP.Y, rootP.Z), camP):PointToObjectSpace(pos)
+    local camP = _G.Local.Cam.CFrame.Position
+    local rel = CFrame.new(Vector3.new(rootP.X, camP.Y, rootP.Z), camP):PointToObjectSpace(pos)
     
     return V2(rel.X, rel.Z)
 end
 function Funcs:relative_to_center(n)
-    return Vars.Cam.ViewportSize / 2 - n
+    return _G.Local.Cam.ViewportSize / 2 - n
 end
 
 
