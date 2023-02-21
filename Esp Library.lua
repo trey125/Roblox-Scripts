@@ -21,7 +21,7 @@ function Funcs:Stop()
 	Drawables = {}
 	Instances = {}
 end
-function Funcs:Remove(Name, Obj) do
+function Funcs:Remove(Name, Obj)
 	if Name == 'Drawable' then
 		for i,v in pairs(Drawables) do
 			if v == Obj then table.remove(Drawables, i) end
