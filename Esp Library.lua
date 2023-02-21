@@ -32,6 +32,7 @@ function Funcs:Remove(Name, Obj)
 			for i,v in pairs(Drawables) do
 				if v == item then table.remove(Drawables, i) end
 			end
+			item:Remove()
 		end
 	elseif Name == 'Instance' then
 		for i,v in pairs(Instances) do
