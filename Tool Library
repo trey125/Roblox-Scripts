@@ -60,7 +60,7 @@ function Funcs:W2S(pos)
 end
 function Funcs:Round(num, dec)
 	local _split = tostring(num):split('.')
-	if #_split == 1 then return num end
+	if #_split == 1 then return num
 	else return tonumber(_split[1] .. '.' .. _split[2]:sub(1, dec)) end
 end
 
