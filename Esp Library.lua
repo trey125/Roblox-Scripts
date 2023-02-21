@@ -21,6 +21,25 @@ function Funcs:Stop()
 	Drawables = {}
 	Instances = {}
 end
+function Funcs:Remove(Name, Obj) do
+	if Name == 'Drawable' then
+		for i,v in pairs(Drawables) do
+			if v == Obj then table.remove(Drawables, i) end
+		end
+		Obj:Remove()
+	elseif Name == 'Table' then
+		for _,item in pairs(Obj) do
+			for i,v in pairs(Drawables) do
+				if v == item then table.remove(Drawables, i) end
+			end
+		end
+	elseif Name == 'Instance' then
+		for i,v in pairs(Instances) do
+			if v == Obj then table.remove(Instances, i) end
+		end
+		Obj:Destroy()
+	end
+end
 
 function Funcs:New(Name, Prop)
 	if Name == 'Triangle' then
