@@ -449,6 +449,7 @@ function library:menu(title)
 		
 		local left_layout = library:create('layout', {
 			FillDirection = Enum.FillDirection.Vertical,
+			SortOrder = Enum.SortOrder.LayoutOrder,
 			Padding = un(0, 5),
 			Parent = left_side
 		})
@@ -542,8 +543,9 @@ function library:menu(title)
 				Parent = section_inner
 			})
 			local layout = library:create('layout', {
-				FillDirection = Enum.FillDirection.Vertical,
 				Padding = un(0, 5),
+				FillDirection = Enum.FillDirection.Vertical,
+				SortOrder = Enum.SortOrder.LayoutOrder,
 				Parent = content
 			})
 			
