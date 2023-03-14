@@ -778,8 +778,8 @@ function library:menu(title)
 			
 			local content = library:create('frame', {
 				BackgroundTransparency = 1,
-				Position = u2n(0, 5, 0, 8),
-				Size = u2n(1, -10, 1, -16),
+				Position = u2n(0, 5, 0, 10),
+				Size = u2n(1, -10, 1, -20),
 				Parent = section_inner
 			})
 			local layout = library:create('layout', {
