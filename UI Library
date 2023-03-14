@@ -58,16 +58,96 @@ library.theme = {
 local base = {}
 
 function base:label(properties)
-	local label = library:create('text', {
-		Text = properties.text
+	local label = {}
+	
+	-- create elements
+	local label_instance = library:create('text', {
+		Size = u2n(1, 0, 0, 20),
+		Text = properties.text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 2,
+		Parent = self.container
 	})
 	
-	label.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
-	library:add_to_registry(label, {
+	label_instance.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
+	
+	-- add to registry
+	library:add_to_registry(label_instance, {
 		['TextColor3'] = properties.dangerous and 'n_dangerous_text' or 'n_text'
 	})
 	
+	-- functions
+	function label:change_text(new)
+		label_instance.Text = new
+	end
+	
+	-- return
+	label['Instance'] = label_instance
+	
 	return label
+end
+function base:button(properties)
+	local button = {}
+	
+	-- create elements
+	local button_outer = library:create('frame', {
+		Name = 'fuck this',
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Size = u2n(1, 0, 0, 20),
+		ZIndex = 2,
+		Parent = self.container
+	})
+	local button_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = library.theme.outline,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = button_outer
+	})
+	local button_title = library:create('text', {
+		Size = u2n(1, 0, 1, 0),
+		Text = properties.text,
+	})
+	
+	button_title.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
+	
+	-- add to registry
+	library:add_to_registry(button_inner, {
+		['BackgroundColor3'] = 'main',
+		['BorderColor3'] = 'outline'
+	})
+	library:add_to_registry(button_title, {
+		['TextColor3'] = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
+	})
+	
+	-- functions
+	function button:change_func(new)
+		properties.callback = new
+	end
+	function button:change_text(new)
+		button_title.Text = new
+	end
+	
+	library:conn(button_outer.InputBegan, function(i) 
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			if properties.callback then properties.callback() end
+		end
+	end)
+	library:conn(button_outer.MouseEnter, function(i)
+		button_inner.BorderColor3 = library.theme.accent
+		library.reg[button_inner].Properties['BorderColor3'] = 'accent'
+	end)
+	library:conn(button_outer.MouseLeave, function(i)
+		button_inner.BorderColor3 = library.theme.outline
+		library.reg[button_inner].Properties['BorderColor3'] = 'outline'
+	end)
+	
+	-- return
+	button['Instance'] = button_outer
+	
+	return button
 end
 
 base.__index = base
@@ -374,12 +454,6 @@ function library:menu(title)
 				ZIndex = 2,
 				Parent = section_inner
 			})
-			local content = library:create('frame', {
-				BackgroundTransparency = 1,
-				Position = u2n(0, 5, 0, 5),
-				Size = u2n(1, -10, 1, - 10),
-				Parent = section_inner
-			})
 			local section_title = library:create('text', {
 				Position = u2n(0, 20, 0, -1),
 				Size = u2n(0, size2, 0, 1),
@@ -389,8 +463,14 @@ function library:menu(title)
 				Parent = section_inner
 			})
 			
+			local content = library:create('frame', {
+				BackgroundTransparency = 1,
+				Position = u2n(0, 5, 0, 5),
+				Size = u2n(1, -10, 1, - 10),
+				Parent = section_inner
+			})
 			local layout = library:create('layout', {
-				FillDirection = Enum.FillDirection.Horizontal,
+				FillDirection = Enum.FillDirection.Vertical,
 				Padding = un(0, 5),
 				Parent = content
 			})
@@ -417,6 +497,7 @@ function library:menu(title)
 			end
 			
 			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
+			section.container = content
 			setmetatable(section, base)
 			
 			return section
