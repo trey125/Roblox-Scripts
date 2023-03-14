@@ -54,6 +54,19 @@ library.theme = {
 
 --< functions >--
 
+-- components
+local base = {}
+
+function library:label(properties)
+	local label = library:create('text', properties)
+	
+	library:add_to_registry(label, {
+		['TextColor3'] = properties.dangerous and 'n_dangerous_text' or 'n_text'
+	})
+	
+	return label
+end
+
 -- library
 function library:unload()
 	for i,v in pairs(self.connections) do
@@ -83,6 +96,13 @@ function library:create(class, ...)
 	local i = Instance.new(class)
 	for Property, Value in pairs(Args) do
 		i[Property] = Value
+	end
+	
+	if class == 'TextLabel' then
+		i['BackgroundTransparency'] = 1
+		i['Font'] = Enum.Font.RobotoMono
+		i['TextSize'] = 14
+		i['TextStrokeTransparency'] = 0
 	end
 	
 	return i
@@ -186,14 +206,10 @@ function library:menu(title)
 	})
 	
 	local title = library:create('text', {
-		BackgroundTransparency = 1,
 		Position = u2n(0, 5, 0, 0),
 		Size = u2n(1, -10, 0, 20),
-		Font = Enum.Font.RobotoMono,
 		Text = title,
 		TextColor3 = library.theme.n_text,
-		TextSize = 14,
-		TextStrokeTransparency = 0,
 		Parent = inner
 	})
 	
@@ -248,13 +264,9 @@ function library:menu(title)
 			Parent = button_area_inner
 		})
 		local tab_title = library:create('text', {
-			BackgroundTransparency = 1,
 			Size = u2n(1, 0, 1, 0),
-			Font = Enum.Font.RobotoMono,
 			Text = name,
 			TextColor3 = library.theme.i_text,
-			TextSize = 14,
-			TextStrokeTransparency = 0,
 			Parent = tab_frame
 		})
 		
@@ -363,14 +375,10 @@ function library:menu(title)
 				Parent = section_inner
 			})
 			local section_title = library:create('text', {
-				BackgroundTransparency = 1,
 				Position = u2n(0, 20, 0, -1),
 				Size = u2n(0, size2, 0, 1),
-				Font = Enum.Font.RobotoMono,
 				Text = name,
 				TextColor3 = library.theme.n_text,
-				TextSize = 14,
-				TextStrokeTransparency = 0,
 				ZIndex = 4,
 				Parent = section_inner
 			})
@@ -399,10 +407,11 @@ function library:menu(title)
 			
 			-- functions
 			local function resize()
-				section_outer.Size = u2n(1, 0, 0, 20 + layout.AbsoluteContentSize.Y)
+				section_outer.Size = u2n(1, 0, 0, 10 + layout.AbsoluteContentSize.Y)
 			end
 			
 			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
+			setmetatable(section, base)
 			
 			return section
 		end
