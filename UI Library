@@ -197,8 +197,10 @@ function library:menu(title)
 		Parent = inner
 	})
 	
-	local button_layout = Instance.new('UIListLayout', button_area_inner)
-	button_layout.FillDirection = Enum.FillDirection.Horizontal
+	local button_layout = library:create('layout', {
+		FillDirection = Enum.FillDirection.Horizontal,
+		Parent = button_area_inner
+	})
 	
 	-- add to registry
 	library:add_to_registry(inner, {
@@ -275,9 +277,11 @@ function library:menu(title)
 			Parent = tab_content_frame
 		})
 		
-		local left_layout = Instance.new('UIListLayout', left_side)
-		left_layout.FillDirection = Enum.FillDirection.Vertical
-		left_layout.Padding = un(0, 5)
+		local left_layout = library:create('layout', {
+			FillDirection = Enum.FillDirection.Vertical,
+			Padding = un(0, 5),
+			Parent = left_side
+		})
 
 		local right_layout = left_layout:Clone()
 		right_layout.Parent	= right_side
@@ -352,6 +356,12 @@ function library:menu(title)
 				ZIndex = 2,
 				Parent = section_inner
 			})
+			local content = library:create('frame', {
+				BackgroundTransparency = 1,
+				Position = u2n(0, 5, 0, 5),
+				Size = u2n(1, -10, 1, - 10),
+				Parent = section_inner
+			})
 			local section_title = library:create('text', {
 				BackgroundTransparency = 1,
 				Position = u2n(0, 20, 0, -1),
@@ -363,6 +373,12 @@ function library:menu(title)
 				TextStrokeTransparency = 0,
 				ZIndex = 4,
 				Parent = section_inner
+			})
+			
+			local layout = library:create('layout', {
+				FillDirection = Enum.FillDirection.Horizontal,
+				Padding = un(0, 5),
+				Parent = content
 			})
 			
 			-- add to registry
@@ -382,6 +398,13 @@ function library:menu(title)
 			
 			
 			-- functions
+			local function resize()
+				section_outer.Size = u2n(1, 0, 0, 20 + layout.AbsoluteContentSize.Y)
+			end
+			
+			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
+			
+			return section
 		end
 		
 		
