@@ -124,13 +124,12 @@ function special:keybind(properties)
 					]]--
 				end
 			else
-				if i.UserInputType == Enum.UserInputType.Keyboard then
-					if i.KeyCode == bind then
-						if properties.callback then properties.callback() end
-					end
-				else
-					if i.KeyCode == bind then
-						if properties.callback then properties.callback() end
+				if i.KeyCode == bind then
+					if properties.callback then
+						properties.callback()
+						if self.change_val then
+							self:change_val(not self.value)
+						end
 					end
 				end
 			end
@@ -303,6 +302,21 @@ function base:toggle(properties)
 	end
 	function toggle:change_val(new)
 		value = new
+		toggle.value = value
+		
+		toggle_color.BackgroundColor3 = value and library.theme.accent or library.theme.main
+		library.reg[toggle_color].Properties['BackgroundColor3'] = value and 'accent' or 'main'
+
+		toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
+		library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
+		
+		if value then
+			toggle_inner.BorderColor3 = library.theme.accent
+			library.reg[toggle_inner].Properties['BorderColor3'] = 'accent'
+		else
+			toggle_inner.BorderColor3 = library.theme.outline
+			library.reg[toggle_inner].Properties['BorderColor3'] = 'outline'
+		end
 	end
 	
 	library:conn(toggle_frame.InputBegan, function(i) 
@@ -315,7 +329,10 @@ function base:toggle(properties)
 			toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
 			library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
 			
-			if properties.callback then properties.callback(value) end
+			if properties.callback then 
+				properties.callback(value)
+				toggle.value = value
+			end
 		end
 	end)
 	library:conn(toggle_frame.MouseEnter, function()
@@ -331,6 +348,7 @@ function base:toggle(properties)
 	
 	-- return
 	toggle.Instance = toggle_frame
+	toggle.value = value
 	setmetatable(toggle, special)
 	return toggle
 end
