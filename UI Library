@@ -29,6 +29,8 @@ local tween = game:GetService('TweenService')
 local rs = game:GetService('RunService')
 local ts = game:GetService('TextService')
 
+local mouse = game:GetService('Players').LocalPlayer:GetMouse()
+
 local library = {
 	connections = {},
 	reg = {}
@@ -45,16 +47,113 @@ library.theme = {
 	
 	n_text = c3rgb(255, 255, 255),
 	a_text = c3rgb(255, 255, 255),
-	i_text = c3rgb(150, 150, 150),
-	
-	n_dangerous_text = c3rgb(255, 0, 0),
-	a_dangerous_text = c3rgb(255, 0, 0),
-	i_dangerous_text = c3rgb(150, 0, 0)
+	i_text = c3rgb(150, 150, 150)
 }
 
 --< functions >--
 
--- components
+-- special
+local special = {}
+
+function special:keybind(properties)
+	local keybind = {}
+	
+	local bind = properties.bind
+	local watching = false
+	
+	local shortened = {
+		[Enum.KeyCode.LeftAlt] = 'LAlt',
+		[Enum.KeyCode.RightAlt] = 'RAlt',
+		[Enum.KeyCode.LeftShift] = 'LShift',
+		[Enum.KeyCode.RightShift] = 'RShift',
+		[Enum.KeyCode.LeftControl] = 'LCtrl',
+		[Enum.KeyCode.RightControl] = 'RCtrl',
+		[Enum.KeyCode.One] = '1',
+		[Enum.KeyCode.Two] = '2',
+		[Enum.KeyCode.Three] = '3',
+		[Enum.KeyCode.Four] = '4',
+		[Enum.KeyCode.Five] = '5',
+		[Enum.KeyCode.Six] = '6',
+		[Enum.KeyCode.Seven] = '7',
+		[Enum.KeyCode.Eight] = '8',
+		[Enum.KeyCode.Nine] = '9',
+		[Enum.KeyCode.Zero] = '0',
+	}
+	local blacklisted = {
+		Enum.KeyCode.Slash,
+		Enum.KeyCode.Escape,
+		Enum.KeyCode.Space
+	}
+	local mouse_keys = {
+		[Enum.UserInputType.MouseButton1] = 'MB1',
+		[Enum.UserInputType.MouseButton2] = 'MB2',
+		[Enum.UserInputType.MouseButton3] = 'MB3'
+	}
+	
+	-- create elements
+	local keybind_label = library:create('text', {
+		Position = u2n(0, 20, 0, -1),
+		Size = u2n(1, -20, 1, 0),
+		Text = '[none]',
+		TextColor3 = library.theme.i_text,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Parent = self.Instance
+	})
+	
+	if shortened[bind] then
+		keybind_label.Text = '[' .. shortened[bind] .. ']'
+	elseif bind.Name then
+		keybind_label.Text = '[' .. bind.Name .. ']'
+	end
+	
+	-- functions
+	library:conn(uis.InputBegan, function(i, gpe)
+		if not gpe then
+			if watching then
+				if i.UserInputType == Enum.UserInputType.Keyboard then
+					if not t_find(blacklisted, i.KeyCode) then
+						bind = i.KeyCode
+						keybind_label.Text = shortened[i.KeyCode] and '[' .. shortened[i.KeyCode] .. ']' or '[' .. i.KeyCode.Name .. ']'
+						watching = false
+					end
+				else
+					--[[
+					bind = i.KeyCode
+					keybind_label.Text = '[' .. mouse_keys[i.UserInputType] .. ']'
+					watching = false
+					]]--
+				end
+			else
+				if i.UserInputType == Enum.UserInputType.Keyboard then
+					if i.KeyCode == bind then
+						if properties.callback then properties.callback() end
+					end
+				else
+					if i.KeyCode == bind then
+						if properties.callback then properties.callback() end
+					end
+				end
+			end
+		end
+	end)
+	
+	library:conn(keybind_label.InputBegan, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			keybind_label.Text = '[...]'
+			bind = nil
+			watching = true
+		end
+	end)
+	
+	-- return
+	keybind.Instance = keybind_label
+	return keybind
+end
+
+special.__index = special
+special.__namecall = function(A, B, ...) return A[B](...) end
+
+-- normal
 local base = {}
 
 function base:label(properties)
@@ -64,16 +163,15 @@ function base:label(properties)
 	local label_instance = library:create('text', {
 		Size = u2n(1, 0, 0, 20),
 		Text = properties.text,
+		TextColor3 = library.theme.n_text,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 2,
 		Parent = self.container
 	})
 	
-	label_instance.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
-	
 	-- add to registry
 	library:add_to_registry(label_instance, {
-		['TextColor3'] = properties.dangerous and 'n_dangerous_text' or 'n_text'
+		['TextColor3'] = 'n_text'
 	})
 	
 	-- functions
@@ -83,6 +181,7 @@ function base:label(properties)
 	
 	-- return
 	label.Instance = label_instance
+	setmetatable(label, special)
 	return label
 end
 function base:button(properties)
@@ -90,7 +189,6 @@ function base:button(properties)
 	
 	-- create elements
 	local button_outer = library:create('frame', {
-		Name = 'fuck this',
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
 		Size = u2n(1, 0, 0, 20),
@@ -107,10 +205,9 @@ function base:button(properties)
 	local button_title = library:create('text', {
 		Size = u2n(1, 0, 1, 0),
 		Text = properties.text,
+		TextColor3 = library.theme.n_text,
 		Parent = button_inner
 	})
-	
-	button_title.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
 	
 	-- add to registry
 	library:add_to_registry(button_inner, {
@@ -118,7 +215,7 @@ function base:button(properties)
 		['BorderColor3'] = 'outline'
 	})
 	library:add_to_registry(button_title, {
-		['TextColor3'] = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
+		['TextColor3'] = 'n_text'
 	})
 	
 	-- functions
@@ -150,7 +247,6 @@ end
 function base:toggle(properties)
 	local toggle = {}
 	local value = properties.default or false
-	local dangerous = properties.dangerous
 	
 	-- create elements
 	local toggle_frame = library:create('frame', {
@@ -166,7 +262,7 @@ function base:toggle(properties)
 	})
 	local toggle_inner = library:create('frame', {
 		BackgroundColor3 = library.theme.bg,
-		BorderColor3 = library.default and library.theme.accent or library.theme.outline,
+		BorderColor3 = value and library.theme.accent or library.theme.outline,
 		BorderMode = Enum.BorderMode.Inset,
 		Position = u2n(0, 1, 0, 1),
 		Size = u2n(1, -2, 1, -2),
@@ -184,30 +280,22 @@ function base:toggle(properties)
 		Position = u2n(0, 20, 0, -1),
 		Size = u2n(1, -20, 1, 0),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Text = properties.text
+		Text = properties.text,
+		TextColor3 = value and library.theme.a_text or library.theme.i_text,
+		Parent = toggle_frame
 	})
 	
 	-- add to registry
 	library:add_to_registry(toggle_inner, {
-		['BackgroundColor3'] = library.theme.bg,
-		['BorderColor3'] = value and library.theme.accent or library.theme.outline
+		['BackgroundColor3'] = 'bg',
+		['BorderColor3'] = value and 'accent' or 'outline'
 	})
 	library:add_to_registry(toggle_color, {
-		['BackgroundColor3'] = value and library.theme.accent or library.theme.main
+		['BackgroundColor3'] = value and 'accent' or 'main'
 	})
 	library:add_to_registry(toggle_title, {
-		['TextColor3'] = library.theme.i_text
+		['TextColor3'] = value and 'a_text' or 'i_text'
 	})
-	
-	if dangerous then
-		local color = value and library.theme.a_dangerous_text or library.theme.i_dangerous_text
-		toggle_title.TextColor3 = color
-		library.reg[toggle_title].Properties['TextColor3'] = color
-	else 
-		local color = value and library.theme.a_text or library.theme.i_text 
-		toggle_title.TextColor3 = color
-		library.reg[toggle_title].Properties['TextColor3'] = color
-	end	
 	
 	-- functions
 	function toggle:change_func(new)
@@ -217,9 +305,143 @@ function base:toggle(properties)
 		value = new
 	end
 	
+	library:conn(toggle_frame.InputBegan, function(i) 
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			value = not value
+			
+			toggle_color.BackgroundColor3 = value and library.theme.accent or library.theme.main
+			library.reg[toggle_color].Properties['BackgroundColor3'] = value and 'accent' or 'main'
+			
+			toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
+			library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
+			
+			if properties.callback then properties.callback(value) end
+		end
+	end)
+	library:conn(toggle_frame.MouseEnter, function()
+		toggle_inner.BorderColor3 = library.theme.accent
+		library.reg[toggle_inner].Properties['BorderColor3'] = 'accent'
+	end)
+	library:conn(toggle_frame.MouseLeave, function()
+		if not value then
+			toggle_inner.BorderColor3 = library.theme.outline
+			library.reg[toggle_inner].Properties['BorderColor3'] = 'outline'
+		end
+	end)
+	
 	-- return
 	toggle.Instance = toggle_frame
+	setmetatable(toggle, special)
 	return toggle
+end
+function base:slider(properties)
+	local slider = {}
+	
+	local value = properties.default
+	local min = properties.min
+	local max = properties.max
+	local prefix = properties.prefix or ''
+	local increment = properties.inc or properties.increment or 1
+	
+	local dragging = false
+	
+	-- create elements
+	local slider_frame = library:create('frame', {
+		BackgroundTransparency = 1,
+		Size = u2n(1, 0, 0, 35),
+		Parent = self.container
+	})
+	local slider_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0 ,0, .5, 0),
+		Size = u2n(1, 0, 0, 15),
+		Parent = slider_frame
+	})
+	local slider_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = slider_outer
+	})
+	local slider_color = library:create('frame', {
+		BackgroundColor3 = library.theme.accent,
+		BorderSizePixel = 0,
+		Size = u2n(value / max, 0, 1, 0),
+		Parent = slider_inner
+	})
+	
+	local slider_title = library:create('text', {
+		Size = u2n(1, 0, 0, 20),
+		Text = properties.text .. ': ' .. tostring(value) .. prefix,
+		TextColor3 = library.theme.n_text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = slider_frame
+	})
+	
+	-- add to registry
+	library:add_to_registry(slider_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(slider_inner, {
+		['BackgroundColor3'] = 'main'
+	})
+	library:add_to_registry(slider_color, {
+		['BackgroundColor3'] = 'accent'
+	})
+	library:add_to_registry(slider_title, {
+		['TextColor3'] = 'n_text'
+	})
+	
+	-- functions
+	local function value_changed()
+		slider_color.Size = u2n(0, math.clamp((mouse.x - slider_inner.AbsolutePosition.X), 0, slider_inner.AbsolutePosition.X), 1, 0)
+		
+		local new_value = (slider_color.Size.X.Offset / slider_inner.AbsoluteSize.X) * (max - min) + min
+		value = math.clamp(increment * math.floor(new_value / increment), min, max)
+		
+		slider_title.Text = properties.text .. ': ' .. tostring(value) .. prefix
+		slider_color.Size = u2n(value / 100, 0, 1, 0)
+		
+		if properties.callback then properties.callback(value) end
+	end
+	
+	function slider:change_func(new)
+		properties.callback = new
+	end
+	function slider:change_value(new)
+		value = new
+		value_changed()
+	end
+	
+	library:conn(slider_frame.InputBegan, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			value_changed()
+		end
+	end)
+	library:conn(slider_frame.InputEnded, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	library:conn(mouse.Move, function()
+		if dragging then value_changed() end
+	end)
+	library:conn(slider_frame.MouseEnter, function()
+		slider_outer.BackgroundColor3 = library.theme.accent
+		library.reg[slider_outer].Properties['BackgroundColor3'] = 'accent'
+	end)
+	library:conn(slider_frame.MouseLeave, function()
+		slider_outer.BackgroundColor3 = library.theme.outline
+		library.reg[slider_outer].Properties['BackgroundColor3'] = 'outline'
+	end)
+	
+	-- return
+	slider.Instance = slider_frame
+	return slider
 end
 
 base.__index = base
@@ -450,7 +672,7 @@ function library:menu(title)
 		local left_layout = library:create('layout', {
 			FillDirection = Enum.FillDirection.Vertical,
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = un(0, 5),
+			Padding = un(0, 10),
 			Parent = left_side
 		})
 
@@ -543,7 +765,7 @@ function library:menu(title)
 				Parent = section_inner
 			})
 			local layout = library:create('layout', {
-				Padding = un(0, 5),
+				Padding = un(0, 3),
 				FillDirection = Enum.FillDirection.Vertical,
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				Parent = content
