@@ -807,7 +807,7 @@ function library:menu(title)
 			
 			-- functions
 			local function resize()
-				section_outer.Size = u2n(1, 0, 0, 10 + layout.AbsoluteContentSize.Y)
+				section_outer.Size = u2n(1, 0, 0, 15 + layout.AbsoluteContentSize.Y)
 			end
 			
 			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
