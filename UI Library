@@ -1,0 +1,399 @@
+--< variables >--
+
+
+-- global
+local v3n = Vector3.new
+local v3z = Vector3.zero
+
+local v2n = Vector2.new
+local v2z = Vector2.zero
+
+local cfn = CFrame.new
+local cfz = CFrame.zero
+
+local c3n = Color3.new
+local c3rgb = Color3.fromRGB
+local c3hsb = Color3.fromHSV
+
+local un = UDim.new
+local u2n = UDim2.new
+
+local t_insert = table.insert
+local t_clear = table.clear
+local t_unpack = table.unpack
+local t_find = table.find
+
+-- local
+local uis = game:GetService('UserInputService')
+local tween = game:GetService('TweenService')
+local rs = game:GetService('RunService')
+local ts = game:GetService('TextService')
+
+local library = {
+	connections = {},
+	reg = {}
+}
+library.theme = {
+	main = c3rgb(30, 30, 30),
+	bg = c3rgb(20, 20, 20),
+	
+	dark_main = c3rgb(15, 15, 15),
+	dark_bg = c3rgb(10, 10, 10),
+	
+	outline = c3rgb(50, 50, 50),
+	accent = c3rgb(170, 130, 255),
+	
+	n_text = c3rgb(255, 255, 255),
+	a_text = c3rgb(255, 255, 255),
+	i_text = c3rgb(150, 150, 150),
+	
+	n_dangerous_text = c3rgb(255, 0, 0),
+	a_dangerous_text = c3rgb(255, 0, 0),
+	i_dangerous_text = c3rgb(75, 0, 0)
+}
+
+--< functions >--
+
+-- library
+function library:unload()
+	for i,v in pairs(self.connections) do
+		v:Disconnect()
+	end
+	
+	if library.gui then
+		library.gui:Destroy()
+	end
+	t_clear(library)
+	_G.Sentra = nil
+end
+function library:create(class, ...)
+	local Args = t_unpack({...})
+	local Shortened = {
+		['frame'] = 'Frame',
+		['Text'] = 'TextLabel',
+		['text'] = 'TextLabel',
+		['Layout'] = 'UIListLayout',
+		['layout'] = 'UIListLayout'
+	}
+	
+	if type(class) ~= 'string' then return 'class was not a <string>' end
+	
+	class = Shortened[class]
+	
+	local i = Instance.new(class)
+	for Property, Value in pairs(Args) do
+		i[Property] = Value
+	end
+	
+	return i
+end
+function library:conn(conn, callback)
+	table.insert(library.connections, conn:Connect(callback))
+end
+
+function library:add_to_registry(inst, prop)
+	local data = {
+		Instance = inst,
+		Properties = prop, -- { 'TextColor3' = 'FontColor' }
+		Index = #library.reg + 1
+	}
+	
+	library.reg[inst] = data
+end
+function library:remove_from_registry(inst)
+	table.remove(library.reg, library.reg[inst].Index)
+end
+function library:update_theme(new_theme)
+	for Object, Data in pairs(library.reg) do -- { Inner = <Table> Data = { <Instance> Instance, <Table> Properties, <Number> Index } }
+		for Property, ColorIdx in pairs(Data.Properties) do -- { ['BackgroundColor3'] = 'accent', ['BorderColor3'] = 'main' }
+			Data.Instance[Property] = new_theme[ColorIdx]
+		end
+	end
+end
+
+function library:text_bounds(Text, Size)
+	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
+end
+
+function library:menu(title)
+	local menu = {
+		tabs = {}
+	}
+	
+	-- create elements
+	library.gui = Instance.new('ScreenGui', game.CoreGui)
+	
+	local outer = library:create('frame', {
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = u2n(0, 400, 0, 50),
+		Size = u2n(0, 550, 0, 600),
+		Parent = library.gui
+	})
+	local inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = library.theme.accent,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = outer
+	})
+	local main_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.bg,
+		BorderColor3 = library.theme.outline,
+		Position = u2n(0, 5, 0, 20),
+		Size = u2n(1, -10, 1, -25),
+		Parent = inner
+	})
+	local main_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.bg,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = main_outer
+	})
+	
+	local button_area_outer = library:create('frame', {
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = u2n(0, 5, 0, 5),
+		Size = u2n(1, -10, 0, 35),
+		Parent = main_inner
+	})
+	local button_area_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.bg,
+		BorderColor3 = library.theme.outline,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = button_area_outer
+	})
+	
+	local section_area_outer = library:create('frame', {
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = u2n(0, 5, 0, 41),
+		Size = u2n(1, -10, 1, -46),
+		Parent = main_inner
+	})
+	local section_area_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = library.theme.outline,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = section_area_outer
+	})
+	
+	local title = library:create('text', {
+		BackgroundTransparency = 1,
+		Position = u2n(0, 5, 0, 0),
+		Size = u2n(1, -10, 0, 20),
+		Font = Enum.Font.RobotoMono,
+		Text = title,
+		TextColor3 = library.theme.n_text,
+		TextSize = 14,
+		TextStrokeTransparency = 0,
+		Parent = inner
+	})
+	
+	local button_layout = Instance.new('UIListLayout', button_area_inner)
+	button_layout.FillDirection = Enum.FillDirection.Horizontal
+	
+	-- add to registry
+	library:add_to_registry(inner, {
+		['BackgroundColor3'] = 'main',
+		['BorderColor3'] = 'accent'
+	})
+	library:add_to_registry(main_outer, {
+		['BackgroundColor3'] = 'bg',
+		['BorderColor3'] = 'outline',
+	})
+	library:add_to_registry(main_inner, {
+		['BackgroundColor3'] = 'bg',
+	})
+	
+	library:add_to_registry(button_area_inner, {
+		['BackgroundColor3'] = 'bg',
+		['BorderColor3'] = 'outline',
+	})
+	
+	library:add_to_registry(section_area_inner, {
+		['BackgroundColor3'] = 'main',
+		['BorderColor3'] = 'outline',
+	})
+	
+	library:add_to_registry(title, {
+		['TextColor3'] = 'n_text'
+	})
+	
+	
+	-- functions
+	function menu:toggle()
+		library.gui.Enabled = not library.gui.Enabled
+	end
+	function menu:tab(name)
+		local tab = {}
+		
+		-- get text bounds
+		local size = library:text_bounds(name, 14)
+		
+		-- create elements
+		local tab_frame = library:create('frame', {
+			BackgroundColor3 = library.theme.dark_bg,
+			BorderColor3 = library.theme.outline,
+			Size = u2n(0, size + 30, 1, 0),
+			Parent = button_area_inner
+		})
+		local tab_title = library:create('text', {
+			BackgroundTransparency = 1,
+			Size = u2n(1, 0, 1, 0),
+			Font = Enum.Font.RobotoMono,
+			Text = name,
+			TextColor3 = library.theme.i_text,
+			TextSize = 14,
+			TextStrokeTransparency = 0,
+			Parent = tab_frame
+		})
+		
+		local tab_content_frame = library:create('frame', {
+			BackgroundTransparency = 1,
+			Size = u2n(1, 0, 1, 0),
+			Visible = false,
+			Parent = section_area_inner
+		})
+		local left_side = library:create('frame', {
+			BackgroundTransparency = 1,
+			Position = u2n(0, 8, 0, 8),
+			Size = u2n(.5, -16, 1, -16),
+			Parent = tab_content_frame
+		})
+		local right_side = library:create('frame', {
+			BackgroundTransparency = 1,
+			Position = u2n(.5, 8, 0, 8),
+			Size = u2n(.5, -16, 1, -16),
+			Parent = tab_content_frame
+		})
+		
+		local left_layout = Instance.new('UIListLayout', left_side)
+		left_layout.FillDirection = Enum.FillDirection.Vertical
+		left_layout.Padding = un(0, 5)
+
+		local right_layout = left_layout:Clone()
+		right_layout.Parent	= right_side
+		
+		-- add to registry
+		library:add_to_registry(tab_frame, {
+			['BackgroundColor3'] = 'dark_bg',
+			['BorderColor3'] = 'outline'
+		})
+		library:add_to_registry(tab_title, {
+			['TextColor3'] = 'i_text'
+		})
+		
+		
+		-- functions
+		function tab:show()
+			for i,v in pairs(menu.tabs) do
+				v:hide()
+			end
+			
+			tab_frame.BackgroundColor3 = library.theme.dark_main
+			tab_title.TextColor3 = library.theme.accent
+
+			library.reg[tab_frame].Properties['BackgroundColor3'] = 'dark_main'
+			library.reg[tab_title].Properties['TextColor3'] = 'accent'
+			
+			tab_content_frame.Visible = true
+		end
+		function tab:hide()
+			tab_frame.BackgroundColor3 = library.theme.dark_bg
+			tab_title.TextColor3 = library.theme.i_text
+
+			library.reg[tab_frame].Properties['BackgroundColor3'] = 'dark_bg'
+			library.reg[tab_title].Properties['TextColor3'] = 'i_text'
+
+			tab_content_frame.Visible = false
+		end
+		function tab:section(name, side)
+			local section = {}
+			
+			local size2 = library:text_bounds(name, 14)
+			
+			-- create elements
+			local section_outer = library:create('frame', {
+				BackgroundColor3 = c3rgb(0, 0, 0),
+				BorderSizePixel = 0,
+				Size = u2n(1, 0, 0, 50),
+				Parent = side == 0 and left_side or right_side
+			})
+			local section_inner = library:create('frame', {
+				BackgroundColor3 = library.theme.bg,
+				BorderColor3 = library.theme.outline,
+				Position = u2n(0, 1, 0, 1),
+				Size = u2n(1, -2, 1, -2),
+				ZIndex = 2,
+				Parent = section_outer
+			})
+			
+			local blocker = library:create('frame', {
+				BackgroundColor3 = library.theme.main,
+				BorderSizePixel = 0,
+				Position = u2n(0, 15, 0, -2),
+				Size = u2n(0, size2 + 10, 0, 4),
+				ZIndex = 3,
+				Parent = section_inner
+			})
+			local accent = library:create('frame', {
+				BackgroundColor3 = library.theme.accent,
+				BorderSizePixel = 0,
+				Position = u2n(0, 1, 0, 1),
+				Size = u2n(1, -2, 0, 1),
+				ZIndex = 2,
+				Parent = section_inner
+			})
+			local section_title = library:create('text', {
+				BackgroundTransparency = 1,
+				Position = u2n(0, 20, 0, -1),
+				Size = u2n(0, size2, 0, 1),
+				Font = Enum.Font.RobotoMono,
+				Text = name,
+				TextColor3 = library.theme.n_text,
+				TextSize = 14,
+				TextStrokeTransparency = 0,
+				ZIndex = 4,
+				Parent = section_inner
+			})
+			
+			-- add to registry
+			library:add_to_registry(section_inner, {
+				['BackgroundColor3'] = 'bg',
+				['BorderColor3'] = 'outline'
+			})
+			library:add_to_registry(blocker, {
+				['BackgroundColor3'] = 'main'
+			})
+			library:add_to_registry(accent, {
+				['BackgroundColor3'] = 'accent'
+			})
+			library:add_to_registry(section_title, {
+				['TextColor3'] = 'n_text'
+			})
+			
+			
+			-- functions
+		end
+		
+		
+		library:conn(tab_frame.InputBegan, function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then tab:show() end end)
+		if #button_area_inner:GetChildren() == 2 then tab:show() end
+		menu.tabs[name] = tab
+		
+		return tab
+	end
+	
+	return menu
+end
+
+_G.Sentra = library
+return library
