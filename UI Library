@@ -108,6 +108,7 @@ function base:button(properties)
 	local button_title = library:create('text', {
 		Size = u2n(1, 0, 1, 0),
 		Text = properties.text,
+		Parent = button_inner
 	})
 	
 	button_title.TextColor3 = properties.dangerous and library.theme.n_dangerous_text or library.theme.n_text
@@ -148,6 +149,7 @@ function base:button(properties)
 	
 	return button
 end
+
 
 base.__index = base
 base.__namecall = function(A, B, ...) return A[B](...) end
