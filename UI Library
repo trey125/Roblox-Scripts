@@ -95,7 +95,6 @@ function base:button(properties)
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
 		Size = u2n(1, 0, 0, 20),
-		ZIndex = 2,
 		Parent = self.container
 	})
 	local button_inner = library:create('frame', {
@@ -434,7 +433,7 @@ function library:menu(title)
 				BorderColor3 = library.theme.outline,
 				Position = u2n(0, 1, 0, 1),
 				Size = u2n(1, -2, 1, -2),
-				ZIndex = 2,
+				ZIndex = 1,
 				Parent = section_outer
 			})
 			
