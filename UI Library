@@ -57,7 +57,7 @@ library.theme = {
 -- components
 local base = {}
 
-function library:label(properties)
+function base:label(properties)
 	local label = library:create('text', properties)
 	
 	library:add_to_registry(label, {
