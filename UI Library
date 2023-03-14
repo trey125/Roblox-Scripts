@@ -92,8 +92,8 @@ function special:keybind(properties)
 	
 	-- create elements
 	local keybind_label = library:create('text', {
-		Position = u2n(0, 20, 0, -1),
-		Size = u2n(1, -20, 1, 0),
+		Position = u2n(.9, 5, 0, 0),
+		Size = u2n(.1, 0, 1, 0),
 		Text = '[none]',
 		TextColor3 = library.theme.i_text,
 		TextXAlignment = Enum.TextXAlignment.Right,
