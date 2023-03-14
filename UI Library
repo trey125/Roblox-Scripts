@@ -33,7 +33,8 @@ local mouse = game:GetService('Players').LocalPlayer:GetMouse()
 
 local library = {
 	connections = {},
-	reg = {}
+	reg = {},
+	ui_open = false
 }
 library.theme = {
 	main = c3rgb(30, 30, 30),
@@ -129,6 +130,7 @@ function special:keybind(properties)
 						properties.callback()
 						if self.change_val then
 							self:change_val(not self.value)
+							self.callback(self.value)
 						end
 					end
 				end
@@ -174,8 +176,8 @@ function base:label(properties)
 	})
 	
 	-- functions
-	function label:change_text(new)
-		label_instance.Text = new
+	function label:update(new_properties)
+		if new_properties.text then label_instance.Text = new_properties.text end
 	end
 	
 	-- return
@@ -218,26 +220,15 @@ function base:button(properties)
 	})
 	
 	-- functions
-	function button:change_func(new)
-		properties.callback = new
-	end
-	function button:change_text(new)
-		button_title.Text = new
+	function button:update(new_properties)
+		if new_properties.callback then properties.callback = new_properties.callback end
+		if new_properties.text then button_title.Text = new_properties.text end
 	end
 	
-	library:conn(button_outer.InputBegan, function(i) 
-		if i.UserInputType == Enum.UserInputType.MouseButton1 then
-			if properties.callback then properties.callback() end
-		end
-	end)
-	library:conn(button_outer.MouseEnter, function(i)
-		button_inner.BorderColor3 = library.theme.accent
-		library.reg[button_inner].Properties['BorderColor3'] = 'accent'
-	end)
-	library:conn(button_outer.MouseLeave, function(i)
-		button_inner.BorderColor3 = library.theme.outline
-		library.reg[button_inner].Properties['BorderColor3'] = 'outline'
-	end)
+	library:mousedown(button_outer, function()
+		if properties.callback then properties.callback() end
+	end, true)
+	library:highlight(button_outer, button_inner, 'BorderColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
 	
 	-- return
 	button.Instance = button_outer
@@ -297,6 +288,10 @@ function base:toggle(properties)
 	})
 	
 	-- functions
+	function toggle:update(new_properties)
+		if new_properties.callback then properties.callback = new_properties.callback end
+		if new_properties.text then toggle_title.Text = new_properties.text end
+	end
 	function toggle:change_func(new)
 		properties.callback = new
 	end
@@ -310,45 +305,30 @@ function base:toggle(properties)
 		toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
 		library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
 		
-		if value then
-			toggle_inner.BorderColor3 = library.theme.accent
-			library.reg[toggle_inner].Properties['BorderColor3'] = 'accent'
-		else
-			toggle_inner.BorderColor3 = library.theme.outline
-			library.reg[toggle_inner].Properties['BorderColor3'] = 'outline'
-		end
+		toggle_inner.BorderColor3 = value and library.theme.accent or library.theme.outline
+		library.reg[toggle_inner].Properties['BorderColor3'] = value and 'accent' or 'outline'
 	end
 	
-	library:conn(toggle_frame.InputBegan, function(i) 
-		if i.UserInputType == Enum.UserInputType.MouseButton1 then
-			value = not value
-			
-			toggle_color.BackgroundColor3 = value and library.theme.accent or library.theme.main
-			library.reg[toggle_color].Properties['BackgroundColor3'] = value and 'accent' or 'main'
-			
-			toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
-			library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
-			
-			if properties.callback then 
-				properties.callback(value)
-				toggle.value = value
-			end
+	library:mousedown(toggle_frame, function()
+		value = not value
+
+		toggle_color.BackgroundColor3 = value and library.theme.accent or library.theme.main
+		library.reg[toggle_color].Properties['BackgroundColor3'] = value and 'accent' or 'main'
+
+		toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
+		library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
+
+		if properties.callback then 
+			properties.callback(value)
+			toggle.value = value
 		end
-	end)
-	library:conn(toggle_frame.MouseEnter, function()
-		toggle_inner.BorderColor3 = library.theme.accent
-		library.reg[toggle_inner].Properties['BorderColor3'] = 'accent'
-	end)
-	library:conn(toggle_frame.MouseLeave, function()
-		if not value then
-			toggle_inner.BorderColor3 = library.theme.outline
-			library.reg[toggle_inner].Properties['BorderColor3'] = 'outline'
-		end
-	end)
+	end, true)
+	library:highlight(toggle_frame, toggle_inner, 'BorderColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
 	
 	-- return
 	toggle.Instance = toggle_frame
 	toggle.value = value
+	toggle.callback = properties.callback
 	setmetatable(toggle, special)
 	return toggle
 end
@@ -426,40 +406,212 @@ function base:slider(properties)
 		if properties.callback then properties.callback(value) end
 	end
 	
-	function slider:change_func(new)
-		properties.callback = new
-	end
-	function slider:change_value(new)
-		value = new
-		value_changed()
+	function slider:update(new_properties)
+		if new_properties.callback then properties.callback = new_properties.callback end
+		if new_properties.value then value = new_properties.value value_changed() end
 	end
 	
-	library:conn(slider_outer.InputBegan, function(i)
-		if i.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			value_changed()
-		end
-	end)
-	library:conn(slider_outer.InputEnded, function(i)
-		if i.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
+	library:mousedown(slider_outer, function()
+		dragging = true
+		value_changed()
+	end, true)
+	library:mouseup(slider_outer, function()
+		dragging = false
 	end)
 	library:conn(mouse.Move, function()
 		if dragging then value_changed() end
 	end)
-	library:conn(slider_outer.MouseEnter, function()
-		slider_outer.BackgroundColor3 = library.theme.accent
-		library.reg[slider_outer].Properties['BackgroundColor3'] = 'accent'
-	end)
-	library:conn(slider_outer.MouseLeave, function()
-		slider_outer.BackgroundColor3 = library.theme.outline
-		library.reg[slider_outer].Properties['BackgroundColor3'] = 'outline'
-	end)
+	library:highlight(slider_outer, slider_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
 	
 	-- return
 	slider.Instance = slider_frame
 	return slider
+end
+function base:dropdown(properties)
+	local dropdown = {}
+	
+	local values = properties.values
+	local value_buttons = {}
+	local chosen = properties.default or 'None'
+	
+	-- create elements
+	local dropdown_frame = library:create('frame', {
+		BackgroundTransparency = 1,
+		Size = u2n(1, 0, 0, 40),
+		Parent = self.container
+	})
+	local dropdown_button_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 0, 0, 20),
+		Size = u2n(1, 0, 0, 18),
+		Parent = dropdown_frame
+	})
+	local dropdown_button_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = dropdown_button_outer
+	})
+	local dropdown_button_image = library:create('image', {
+		BackgroundTransparency = 1,
+		Position = u2n(1, -20, 0, -2),
+		Size = u2n(0, 20, 0, 20),
+		Image = 'rbxassetid://3926307971',
+		ImageRectOffset = v2n(324, 524),
+		ImageRectSize = v2n(36, 36),
+		Parent = dropdown_button_outer
+	})
+	local dropdown_value = library:create('text', {
+		Position = u2n(0, 3, 0, 0),
+		Size = u2n(1, -6, 0, 15),
+		Text = chosen,
+		TextColor3 = library.theme.a_text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = dropdown_button_outer
+	})
+	local dropdown_title = library:create('text', {
+		Size = u2n(1, 0, 0, 15),
+		Text = properties.text,
+		TextColor3 = library.theme.a_text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = dropdown_frame
+	})
+	
+	local dropdown_content_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 0, 0, 40),
+		Size = u2n(1, 0, 0, (#values * 15) + 4),
+		Visible = false,
+		ZIndex = 2,
+		Parent = dropdown_frame
+	})
+	local dropdown_content_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.dark_main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		ZIndex = 3,
+		Parent = dropdown_content_outer
+	})
+	local dropdown_content_layout = library:create('layout', {
+		FillDirection = Enum.FillDirection.Vertical,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = dropdown_content_inner
+	})
+	for i,v in pairs(values) do
+		local btn = {}
+		
+		-- create elements
+		local btn_frame = library:create('frame', {
+			BackgroundTransparency = 1,
+			BackgroundColor3 = library.theme.main,
+			BorderSizePixel = 0,
+			Size = u2n(1, 0, 0, 15),
+			ZIndex = 4,
+			Parent = dropdown_content_inner
+		})
+		local btn_title = library:create('text', {
+			Position = u2n(0, 3, 0, -1),
+			Size = u2n(1, -6, 1, 0),
+			Text = v,
+			TextColor3 = library.theme.i_text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 5,
+			Parent = btn_frame
+		})
+		
+		-- add to registry
+		library:add_to_registry(btn_frame, {
+			['BackgroundColor3'] = 'main'
+		})
+		library:add_to_registry(btn_title, {
+			['TextColor3'] = 'i_text'
+		})
+		
+		if chosen == v then
+			btn_frame.BackgroundTransparency = 0
+			
+			btn_title.TextColor3 = library.theme.a_text
+			library.reg[btn_title].Properties['TextColor3'] = 'a_text'
+		end
+		
+		-- functions
+		function btn:Hide()
+			btn_frame.BackgroundTransparency = 1
+			
+			btn_title.TextColor3 = library.theme.i_text
+			library.reg[btn_title].Properties['TextColor3'] = 'i_text'
+		end
+		function btn:Show()
+			btn_frame.BackgroundTransparency = 0
+
+			btn_title.TextColor3 = library.theme.a_text
+			library.reg[btn_title].Properties['TextColor3'] = 'a_text'
+		end
+		
+		library:mousedown(btn_frame, function()
+			for i,v in pairs(value_buttons) do v:Hide() end
+			btn:Show()
+			
+			chosen = v
+			dropdown_value.Text = v
+			if properties.callback then properties.callback(v) end
+		end, false)
+		
+		-- return
+		btn.Instance = btn_frame
+		value_buttons[v] = btn
+	end
+	
+	-- add to registry
+	library:add_to_registry(dropdown_button_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(dropdown_button_inner, {
+		['BackgroundColor3'] = 'main'
+	})
+	library:add_to_registry(dropdown_value, {
+		['TextColor3'] = 'a_text'
+	})
+	library:add_to_registry(dropdown_title, {
+		['TextColor3'] = 'a_text'
+	})
+	library:add_to_registry(dropdown_content_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(dropdown_content_inner, {
+		['BackgroundColor3'] = 'dark_main'
+	})
+	
+	-- functions
+	function dropdown:update(new_properties)
+		if new_properties.callback then properties.callback = new_properties.callback end
+		if new_properties.text then dropdown_title.Text = new_properties.text end
+		if new_properties.value then
+			if value_buttons[new_properties.value] then
+				chosen = new_properties.value
+				dropdown_value.Text = new_properties.value
+				
+				for i,v in pairs(value_buttons) do v:Hide() end
+				value_buttons[new_properties.value]:Show()
+			end
+		end
+	end
+	
+	library:mousedown(dropdown_button_outer, function()
+		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
+		library.ui_open = dropdown_content_outer.Visible
+	end, false)
+	library:highlight(dropdown_button_outer, dropdown_button_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, false)
+	
+	-- return
+	dropdown.Instance = dropdown_frame
+	return dropdown
 end
 
 base.__index = base
@@ -484,7 +636,9 @@ function library:create(class, ...)
 		['Text'] = 'TextLabel',
 		['text'] = 'TextLabel',
 		['Layout'] = 'UIListLayout',
-		['layout'] = 'UIListLayout'
+		['layout'] = 'UIListLayout',
+		['Image'] = 'ImageLabel',
+		['image'] = 'ImageLabel'
 	}
 	
 	if type(class) ~= 'string' then return 'class was not a <string>' end
@@ -497,7 +651,7 @@ function library:create(class, ...)
 	end
 	
 	if class == 'TextLabel' then
-		i['BackgroundTransparency'] = 1
+		if not Args['BackgroundTransparency'] then i['BackgroundTransparency'] = 1 end
 		i['Font'] = Enum.Font.RobotoMono
 		i['TextSize'] = 14
 		i['TextStrokeTransparency'] = 0
@@ -505,8 +659,39 @@ function library:create(class, ...)
 	
 	return i
 end
+
 function library:conn(conn, callback)
 	table.insert(library.connections, conn:Connect(callback))
+end
+function library:highlight(inst, instc, pn, active, inactive, ui)
+	library:conn(inst.MouseEnter, function()
+		if ui and not library.ui_open or not ui then
+			instc[pn] = active.c
+			library.reg[instc].Properties[pn] = active.cn
+		end
+	end)
+	library:conn(inst.MouseLeave, function()
+		if ui and not library.ui_open or not ui then
+			instc[pn] = inactive.c
+			library.reg[instc].Properties[pn] = inactive.cn
+		end
+	end)
+end
+function library:mousedown(inst, callback, ui)
+	library:conn(inst.InputBegan, function(i)
+		if ui and not library.ui_open or not ui then
+			if i.UserInputType == Enum.UserInputType.MouseButton1 then
+				callback()
+			end
+		end
+	end)
+end
+function library:mouseup(inst, callback)
+	library:conn(inst.InputEnded, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			callback()
+		end
+	end)
 end
 
 function library:add_to_registry(inst, prop)
@@ -807,13 +992,60 @@ function library:menu(title)
 			
 			-- functions
 			local function resize()
-				section_outer.Size = u2n(1, 0, 0, 15 + layout.AbsoluteContentSize.Y)
+				section_outer.Size = u2n(1, 0, 0, layout.AbsoluteContentSize.Y + 15)
+			end
+			
+			function section:seperator(properties)
+				local seperator = {}
+				
+				-- create elements
+				local seperator_frame = library:create('frame', {
+					BackgroundTransparency = 1,
+					Size = u2n(1, 0, 0, 20),
+					Parent = content
+				})
+				local seperator_accent = library:create('frame', {
+					BackgroundColor3 = library.theme.accent,
+					BorderSizePixel = 0,
+					Position = u2n(0, 0, .5, 0),
+					Size = u2n(1, 0, 0, 1),
+					Parent = seperator_frame
+				})
+				local seperator_title = library:create('text', {
+					BackgroundTransparency = 0,
+					BackgroundColor3 = library.theme.bg,
+					BorderSizePixel = 0,
+					Position = u2n(0, 15, 0, -2),
+					Size = u2n(0, library:text_bounds(properties.text, 14) + 10, 1, 0),
+					Text = properties.text,
+					TextColor3 = library.theme.a_text,
+					Parent = seperator_frame
+				})
+				
+				-- add to registry
+				library:add_to_registry(seperator_accent, {
+					['BackgroundColor3'] = 'accent'
+				})
+				library:add_to_registry(seperator_title, {
+					['BackgroundColor3'] = 'bg',
+					['TextColor3'] = 'n_text'
+				})
+				
+				-- functions
+				function seperator:update(new_properties)
+					seperator_title.Text = new_properties.text
+				end
+				
+				-- return
+				seperator.Instance = seperator_frame
+				return seperator
 			end
 			
 			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
 			section.container = content
 			setmetatable(section, base)
 			
+			-- return
 			return section
 		end
 		
@@ -822,6 +1054,7 @@ function library:menu(title)
 		if #button_area_inner:GetChildren() == 2 then tab:show() end
 		menu.tabs[name] = tab
 		
+		-- return
 		return tab
 	end
 	
