@@ -416,13 +416,13 @@ function base:slider(properties)
 		value_changed()
 	end
 	
-	library:conn(slider_frame.InputBegan, function(i)
+	library:conn(slider_outer.InputBegan, function(i)
 		if i.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			value_changed()
 		end
 	end)
-	library:conn(slider_frame.InputEnded, function(i)
+	library:conn(slider_outer.InputEnded, function(i)
 		if i.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
 		end
@@ -430,11 +430,11 @@ function base:slider(properties)
 	library:conn(mouse.Move, function()
 		if dragging then value_changed() end
 	end)
-	library:conn(slider_frame.MouseEnter, function()
+	library:conn(slider_outer.MouseEnter, function()
 		slider_outer.BackgroundColor3 = library.theme.accent
 		library.reg[slider_outer].Properties['BackgroundColor3'] = 'accent'
 	end)
-	library:conn(slider_frame.MouseLeave, function()
+	library:conn(slider_outer.MouseLeave, function()
 		slider_outer.BackgroundColor3 = library.theme.outline
 		library.reg[slider_outer].Properties['BackgroundColor3'] = 'outline'
 	end)
