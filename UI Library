@@ -49,7 +49,7 @@ library.theme = {
 	
 	n_dangerous_text = c3rgb(255, 0, 0),
 	a_dangerous_text = c3rgb(255, 0, 0),
-	i_dangerous_text = c3rgb(75, 0, 0)
+	i_dangerous_text = c3rgb(150, 0, 0)
 }
 
 --< functions >--
@@ -82,8 +82,7 @@ function base:label(properties)
 	end
 	
 	-- return
-	label['Instance'] = label_instance
-	
+	label.Instance = label_instance
 	return label
 end
 function base:button(properties)
@@ -145,11 +144,83 @@ function base:button(properties)
 	end)
 	
 	-- return
-	button['Instance'] = button_outer
-	
+	button.Instance = button_outer
 	return button
 end
-
+function base:toggle(properties)
+	local toggle = {}
+	local value = properties.default or false
+	local dangerous = properties.dangerous
+	
+	-- create elements
+	local toggle_frame = library:create('frame', {
+		BackgroundTransparency = 1,
+		Size = u2n(1, 0, 0, 15),
+		Parent = self.container
+	})
+	local toggle_outer = library:create('frame', {
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Size = u2n(0, 15, 1, 0),
+		Parent = toggle_frame
+	})
+	local toggle_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.bg,
+		BorderColor3 = library.default and library.theme.accent or library.theme.outline,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = toggle_outer
+	})
+	local toggle_color = library:create('frame', {
+		BackgroundColor3 = value and library.theme.accent or library.theme.main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = toggle_inner
+	})
+	
+	local toggle_title = library:create('text', {
+		Position = u2n(0, 20, 0, -1),
+		Size = u2n(1, -20, 1, 0),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Text = properties.text
+	})
+	
+	-- add to registry
+	library:add_to_registry(toggle_inner, {
+		['BackgroundColor3'] = library.theme.bg,
+		['BorderColor3'] = value and library.theme.accent or library.theme.outline
+	})
+	library:add_to_registry(toggle_color, {
+		['BackgroundColor3'] = value and library.theme.accent or library.theme.main
+	})
+	library:add_to_registry(toggle_title, {
+		['TextColor3'] = library.theme.i_text
+	})
+	
+	if dangerous then
+		local color = value and library.theme.a_dangerous_text or library.theme.i_dangerous_text
+		toggle_title.TextColor3 = color
+		library.reg[toggle_title].Properties['TextColor3'] = color
+	else 
+		local color = value and library.theme.a_text or library.theme.i_text 
+		toggle_title.TextColor3 = color
+		library.reg[toggle_title].Properties['TextColor3'] = color
+	end	
+	
+	-- functions
+	function toggle:change_func(new)
+		properties.callback = new
+	end
+	function toggle:change_val(new)
+		value = new
+	end
+	
+	-- return
+	toggle.Instance = toggle_frame
+	return toggle
+end
 
 base.__index = base
 base.__namecall = function(A, B, ...) return A[B](...) end
