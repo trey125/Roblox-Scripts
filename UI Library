@@ -496,7 +496,7 @@ function base:dropdown(properties)
 		BorderMode = Enum.BorderMode.Inset,
 		Position = u2n(0, 1, 0, 1),
 		Size = u2n(1, -2, 1, -2),
-		ZIndex = 3,
+		ZIndex = 5,
 		Parent = dropdown_content_outer
 	})
 	local dropdown_content_layout = library:create('layout', {
@@ -513,7 +513,7 @@ function base:dropdown(properties)
 			BackgroundColor3 = library.theme.main,
 			BorderSizePixel = 0,
 			Size = u2n(1, 0, 0, 15),
-			ZIndex = 4,
+			ZIndex = 5,
 			Parent = dropdown_content_inner
 		})
 		local btn_title = library:create('text', {
