@@ -433,7 +433,7 @@ function base:dropdown(properties)
 	
 	local values = properties.values
 	local value_buttons = {}
-	local chosen = properties.default or 'None'
+	local chosen = properties.default or 'none'
 	
 	-- create elements
 	local dropdown_frame = library:create('frame', {
