@@ -1,0 +1,97 @@
+local handler = {
+    entities = {},
+    connections = {},
+    reg = {},
+    
+    player_added_callback = nil,
+    player_removing_callback = nil
+}
+
+function handler:stop()
+    for i,v in pairs(handler.entities) do
+        v:remove()
+    end
+    for i,v in pairs(handler.connections) do
+        v:Disconnect()
+    end
+    
+    table.clear(handler)
+end
+function handler:create_entity(player)
+    local data = {
+        player = player,
+        
+        name = player.Name,
+        display_name = player.DisplayName,
+        
+        team = player.Team,
+        
+        character = player.Character or nil,
+        
+        character_added_callback = nil,
+        character_died_callback = nil,
+        render_stepped_callback = nil,
+        
+        connections = {},
+        index = #handler.reg + 1
+        
+    }
+    function data:remove()
+        for i,v in pairs(data.connections) do v:Disconnect() end
+        
+        table.remove(handler.entities, data.index)
+        table.clear(data)
+    end
+    function data:alive()
+        return player.character and player.character.Humanoid and player.character.HumanoidRootPart and player.character.Humanoid.Health > 0
+    end
+    
+    table.insert(handler.entities, data)
+    table.insert(data.connections, player.CharacterAdded:Connect(function()
+        data.character = player.Character
+        if data.character_added_callback then data.character_added_callback() end
+        
+        table.insert(data.connections, player.Character:WaitForChild('Humanoid').Died:Connect(function()
+            data.character = nil
+            if data.character_died_callback then data.character_died_callback() end
+        end))
+    end))
+    if player.Character then
+        table.insert(data.connections, player.Character:WaitForChild('Humanoid').Died:Connect(function()
+            data.character = nil
+            if data.character_died_callback then data.character_died_callback() end
+        end))
+    end
+    
+    table.insert(data.connections, game:GetService('RunService').RenderStepped:Connect(function()
+        if data.update then
+            if data.alive() then data.update() end
+        end
+    end))
+    
+    handler.reg[player.Name] = data
+end
+function handler:remove_entity(player)
+    local data = handler.reg[player.Name]
+    
+    data:remove()
+    handler.reg[player.Name] = nil
+end
+
+for i,v in pairs(game:GetService('Players'):GetChildren()) do
+    if v ~= game:GetService('Players').LocalPlayer then
+        handler:create_entity(v)
+    end
+end
+table.insert(handler.connections, game:GetService('Players').PlayerAdded:Connect(function(player)
+    if player ~= game:GetService('Players').LocalPlayer then
+        handler:create_entity(player)
+        if handler.player_added_callback then handler.player_added_callback(player) end
+    end
+end))
+table.insert(handler.connections, game:GetService('Players').PlayerRemoving:Connect(function(player)
+    handler:remove_entity(player)
+    if handler.player_removing_callback then handler.player_removing_callback(player) end
+end))
+
+return handler
