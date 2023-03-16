@@ -402,7 +402,7 @@ function base:slider(properties)
 		value = math.clamp(increment * math.floor(new_value / increment), min, max)
 		
 		slider_title.Text = properties.text .. ': ' .. tostring(value) .. prefix
-		slider_color.Size = u2n(value / 100, 0, 1, 0)
+		slider_color.Size = u2n(value / max, 0, 1, 0)
 		
 		if properties.callback then properties.callback(value) end
 	end
