@@ -32,7 +32,6 @@ function handler:create_entity(player)
         
         character_added_callback = nil,
         character_died_callback = nil,
-        render_stepped_callback = nil,
         
         connections = {},
         index = #handler.reg + 1
