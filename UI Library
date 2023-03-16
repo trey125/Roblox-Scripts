@@ -695,6 +695,29 @@ function library:mouseup(inst, callback)
 		end
 	end)
 end
+function library:draggable(inst)
+	inst.Active = true
+	
+	library:conn(inst.InputBegan, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			local pos = v2n(mouse.X - inst.AbsolutePosition.X, mouse.Y - inst.AbsolutePosition.Y)
+			if pos.Y > 15 then return end
+			
+			while uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+				local new_pos = u2n(0, mouse.x - pos.X + (inst.Size.X.Offset * inst.AnchorPoint.X), 0, mouse.Y - pos.Y + (inst.Size.Y.Offset * inst.AnchorPoint.Y))
+				
+				if new_pos.X.Offset < 2 then new_pos = u2n(0, 2, 0, new_pos.Y.Offset) end
+				if new_pos.X.Offset + inst.Size.X.Offset > 1918 then new_pos = u2n(0, 1918 - inst.Size.X.Offset, 0, new_pos.Y.Offset) end
+				if new_pos.Y.Offset < -34 then new_pos = u2n(0, new_pos.X.Offset, 0, -34) end
+				if new_pos.Y.Offset + inst.Size.Y.Offset > 1042 then new_pos = u2n(0, new_pos.X.Offset, 0, 1042 - inst.Size.Y.Offset) end
+				
+				inst.Position = new_pos
+					
+				rs.RenderStepped:Wait()
+			end
+		end
+	end)
+end
 
 function library:add_to_registry(inst, prop)
 	local data = {
@@ -803,6 +826,8 @@ function library:menu(title)
 		Parent = button_area_inner
 	})
 	
+	library:draggable(outer)
+	
 	-- add to registry
 	library:add_to_registry(inner, {
 		['BackgroundColor3'] = 'main',
@@ -829,6 +854,7 @@ function library:menu(title)
 	library:add_to_registry(title, {
 		['TextColor3'] = 'n_text'
 	})
+	
 	
 	
 	-- functions
