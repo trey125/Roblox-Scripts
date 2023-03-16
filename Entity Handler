@@ -51,8 +51,8 @@ function handler:create_entity(player)
     table.insert(handler.entities, data)
     table.insert(data.connections, player.CharacterAdded:Connect(function()
         data.character = player.Character
-        data.hrp = player.Character.HumanoidRootPart
-        data.h = player.Character.Humanoid
+        data.hrp = player.Character:WaitForChild('HumanoidRootPart')
+        data.h = player.Character:WaitForChild('Humanoid')
         if data.character_added_callback then data.character_added_callback() end
         
         table.insert(data.connections, player.Character:WaitForChild('Humanoid').Died:Connect(function()
