@@ -30,6 +30,7 @@ function handler:create_entity(player)
         hrp = nil,
         h = nil,
         
+        update = nil,
         character_added_callback = nil,
         character_died_callback = nil,
         
