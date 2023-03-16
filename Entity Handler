@@ -103,3 +103,5 @@ table.insert(handler.connections, game:GetService('Players').PlayerRemoving:Conn
     handler:remove_entity(player)
     if handler.player_removing_callback then handler.player_removing_callback(player) end
 end))
+
+return handler
