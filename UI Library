@@ -336,9 +336,9 @@ end
 function base:slider(properties)
 	local slider = {}
 	
-	local value = properties.default
-	local min = properties.min
-	local max = properties.max
+	local value = properties.default or 0
+	local min = properties.min or 0
+	local max = properties.max or 100
 	local prefix = properties.prefix or ''
 	local increment = properties.inc or properties.increment or 1
 	
