@@ -53,7 +53,9 @@ function handler:create_entity(player)
         data.character = player.Character
         data.hrp = player.Character:WaitForChild('HumanoidRootPart')
         data.h = player.Character:WaitForChild('Humanoid')
-        if data.character_added_callback then data.character_added_callback() end
+        if data.character_added_callback then 
+            data.character_added_callback() 
+        end
         
         table.insert(data.connections, player.Character:WaitForChild('Humanoid').Died:Connect(function()
             data.character = nil
@@ -61,6 +63,10 @@ function handler:create_entity(player)
         end))
     end))
     if player.Character then
+        data.character = player.Character
+        data.hrp = player.Character:WaitForChild('HumanoidRootPart')
+        data.h = player.Character:WaitForChild('Humanoid')
+        
         table.insert(data.connections, player.Character:WaitForChild('Humanoid').Died:Connect(function()
             data.character = nil
             if data.character_died_callback then data.character_died_callback() end
@@ -97,5 +103,3 @@ table.insert(handler.connections, game:GetService('Players').PlayerRemoving:Conn
     handler:remove_entity(player)
     if handler.player_removing_callback then handler.player_removing_callback(player) end
 end))
-
-return handler
