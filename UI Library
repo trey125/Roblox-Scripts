@@ -1017,7 +1017,7 @@ function library:menu(title)
 					BackgroundTransparency = 0,
 					BackgroundColor3 = library.theme.bg,
 					BorderSizePixel = 0,
-					Position = u2n(0, 15, 0, -2),
+					Position = u2n(.2, 15, 0, -2),
 					Size = u2n(0, library:text_bounds(properties.text, 14) + 10, 1, 0),
 					Text = properties.text,
 					TextColor3 = library.theme.a_text,
