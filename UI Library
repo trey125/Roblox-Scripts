@@ -109,6 +109,11 @@ function special:keybind(properties)
 		end
 	end
 	
+	-- add to registry
+	library:add_to_registry(keybind_label, {
+		['TextColor3'] = 'i_text'
+	})
+	
 	-- functions
 	library:conn(uis.InputBegan, function(i, gpe)
 		if not gpe then
@@ -149,6 +154,180 @@ function special:keybind(properties)
 	-- return
 	keybind.Instance = keybind_label
 	return keybind
+end
+function special:color(properties)
+	local color = {}
+	
+	local value = properties.default or properties.color or c3rgb(255, 255, 255)
+	
+	-- create elements
+	local color_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(1.25, 0, 0, 0),
+		Size = u2n(0, 15, 0, 15),
+		Parent = self.Instance
+	})
+	local color_inner = library:create('frame', {
+		BackgroundColor3 = value,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = color_outer
+	})
+	
+	local content_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.bg,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 0, 1, 0),
+		Size = u2n(1, 0, 0, 110),
+		Visible = false,
+		ZIndex = 5,
+		Parent = self.Instance
+	})
+	local content_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		ZIndex = 6,
+		Parent = content_outer
+	})
+	local layout = library:create('layout', {
+		FillDirection = Enum.FillDirection.Vertical,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = content_inner
+	})
+	
+	for i=1,3 do
+		local dragging = false
+		
+		-- create elements
+		local slider_frame = library:create('frame', {
+			BackgroundTransparency = 1,
+			Size = u2n(1, 0, 0, 35),
+			ZIndex = 7,
+			Parent = content_inner
+		})
+		local slider_outer = library:create('frame', {
+			BackgroundColor3 = library.theme.bg,
+			BorderColor3 = c3rgb(0, 0, 0),
+			Position = u2n(0, 0, .5, 0),
+			Size = u2n(1, 0, 0, 15),
+			ZIndex = 8,
+			Parent = slider_frame
+		})
+		local slider_inner = library:create('frame', {
+			BackgroundColor3 = library.theme.dark_main,
+			BorderColor3 = c3rgb(0, 0, 0),
+			BorderMode = Enum.BorderMode.Inset,
+			Position = u2n(0, 1, 0, 1),
+			Size = u2n(1, -2, 1, -2),
+			ZIndex = 9,
+			Parent = slider_outer
+		})
+		local slider_color = library:create('frame', {
+			BackgroundColor3 = library.theme.accent,
+			BorderSizePixel = 0,
+			Size = u2n(value.R / 1, 0, 1, 0),
+			ZIndex = 10,
+			Parent = slider_inner
+		})
+		local slider_title = library:create('text', {
+			Size = u2n(1, 0, 0, 20),
+			Text = 'R: ' .. tostring(value.R * 255),
+			TextColor3 = library.theme.a_text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 8,
+			Parent = slider_frame
+		})
+		
+		if i == 2 then 
+			slider_title.Text = 'G: ' .. tostring(value.G * 255)
+			slider_color.Size = u2n(value.G / 1, 0, 1, 0)
+		elseif i == 3 then 
+			slider_title.Text = 'B: ' .. tostring(value.B * 255) 
+			slider_color.Size = u2n(value.B / 1, 0, 1, 0)
+			
+		end
+		
+		-- add to registry
+		library:add_to_registry(slider_outer, {
+			['BackgroundColor3'] = 'bg'
+		})
+		library:add_to_registry(slider_inner, {
+			['BackgroundColor3'] = 'dark_main'
+		})
+		library:add_to_registry(slider_title, {
+			['TextColor3'] = 'a_text'
+		})
+		
+		-- functions
+		local function value_changed()
+			slider_color.Size = u2n(0, math.clamp((mouse.x - slider_inner.AbsolutePosition.X), 0, slider_inner.AbsolutePosition.X), 1, 0)
+
+			local new_value = (slider_color.Size.X.Offset / slider_inner.AbsoluteSize.X) * (255 - 0) + 0
+			local nvalue = math.clamp(1 * math.floor(new_value / 1), 0, 255)
+
+			slider_color.Size = u2n(nvalue / 255, 0, 1, 0)
+			
+			if i == 1 then
+				value = c3rgb(nvalue, value.G * 255, value.B * 255)
+				
+				slider_title.Text = 'R: ' .. tostring(math.round(value.R * 255))
+				color_inner.BackgroundColor3 = value
+				if properties.callback then properties.callback(value) end
+			elseif i == 2 then 
+				value = c3rgb(value.R * 255, nvalue, value.B * 255)
+				
+				slider_title.Text = 'G: ' .. tostring(math.round(value.G * 255))
+				color_inner.BackgroundColor3 = value
+				if properties.callback then properties.callback(value) end
+			elseif i == 3 then 
+				value = c3rgb(value.R * 255, value.G * 255, nvalue)
+				
+				slider_title.Text = 'B: ' .. tostring(math.round(value.B * 255))
+				color_inner.BackgroundColor3 = value
+				if properties.callback then properties.callback(value) end
+			end
+		end
+		
+		library:mousedown(slider_outer, function()
+			dragging = true
+			value_changed()
+		end, false)
+		library:mouseup(slider_outer, function()
+			dragging = false
+		end)
+		library:conn(mouse.Move, function()
+			if dragging then value_changed() end
+		end)
+	end
+	
+	-- add to registry
+	library:add_to_registry(color_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(content_outer, {
+		['BackgroundColor3'] = 'bg'
+	})
+	library:add_to_registry(content_inner, {
+		['BackgroundColor3'] = 'main'
+	})
+	
+	-- functions
+	library:mousedown(color_outer, function()
+		content_outer.Visible = not content_outer.Visible
+		library.ui_open = content_outer.Visible
+	end, false)
+	
+	library:highlight(color_outer, color_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' })
+	
+	-- return
+	color.Instance = color_outer
+	return color
 end
 
 special.__index = special
