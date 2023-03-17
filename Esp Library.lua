@@ -85,6 +85,7 @@ function Funcs:New(Name, Prop)
 		c.FillTransparency = Prop.FT or 0
 		c.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 		c.Enabled = Prop.Enabled or false
+		table.insert(Instances, c)
 		return c
 	elseif Name == '3DBox' then
 		local Box3DTable = {
