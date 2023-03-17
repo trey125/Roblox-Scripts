@@ -804,9 +804,9 @@ function library:unload()
 		v:Disconnect()
 	end
 	
-	if library.gui then
-		library.gui:Destroy()
-	end
+	if library.gui then library.gui:Destroy() end
+	if library.unload_callback then library.unload_callback() end
+	
 	t_clear(library)
 	_G.Sentra = nil
 end
