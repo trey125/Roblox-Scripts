@@ -50,6 +50,7 @@ library.theme = {
 	a_text = c3rgb(255, 255, 255),
 	i_text = c3rgb(150, 150, 150)
 }
+library.backup_theme = library.theme
 
 --< functions >--
 
