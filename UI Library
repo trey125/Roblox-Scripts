@@ -260,6 +260,9 @@ function special:color(properties)
 		library:add_to_registry(slider_inner, {
 			['BackgroundColor3'] = 'dark_main'
 		})
+		library:add_to_registry(slider_color, {
+			['BackgroundColor3'] = 'accent'
+		})
 		library:add_to_registry(slider_title, {
 			['TextColor3'] = 'a_text'
 		})
@@ -323,7 +326,7 @@ function special:color(properties)
 		library.ui_open = content_outer.Visible
 	end, false)
 	
-	library:highlight(color_outer, color_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' })
+	library:highlight(color_outer, color_outer, 'BackgroundColor3', 'accent', 'outline')
 	
 	-- return
 	color.Instance = color_outer
@@ -408,7 +411,7 @@ function base:button(properties)
 	library:mousedown(button_outer, function()
 		if properties.callback then properties.callback() end
 	end, true)
-	library:highlight(button_outer, button_inner, 'BorderColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
+	library:highlight(button_outer, button_inner, 'BorderColor3', 'accent', 'outline', true)
 	
 	-- return
 	button.Instance = button_outer
@@ -601,7 +604,7 @@ function base:slider(properties)
 	library:conn(mouse.Move, function()
 		if dragging then value_changed() end
 	end)
-	library:highlight(slider_outer, slider_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
+	library:highlight(slider_outer, slider_outer, 'BackgroundColor3', 'accent', 'outline', true)
 	
 	-- return
 	slider.Instance = slider_frame
@@ -787,7 +790,7 @@ function base:dropdown(properties)
 		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
 		library.ui_open = dropdown_content_outer.Visible
 	end, false)
-	library:highlight(dropdown_button_outer, dropdown_button_outer, 'BackgroundColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, false)
+	library:highlight(dropdown_button_outer, dropdown_button_outer, 'BackgroundColor3', 'accent', 'outline', false)
 	
 	-- return
 	dropdown.Instance = dropdown_frame
@@ -844,17 +847,17 @@ end
 function library:conn(conn, callback)
 	table.insert(library.connections, conn:Connect(callback))
 end
-function library:highlight(inst, instc, pn, active, inactive, ui)
+function library:highlight(inst, instc, pn, acn, icn, ui)
 	library:conn(inst.MouseEnter, function()
 		if ui and not library.ui_open or not ui then
-			instc[pn] = active.c
-			library.reg[instc].Properties[pn] = active.cn
+			instc[pn] = library.theme[acn]
+			library.reg[instc].Properties[pn] = acn
 		end
 	end)
 	library:conn(inst.MouseLeave, function()
 		if ui and not library.ui_open or not ui then
-			instc[pn] = inactive.c
-			library.reg[instc].Properties[pn] = inactive.cn
+			instc[pn] = library.theme[icn]
+			library.reg[instc].Properties[pn] = icn
 		end
 	end)
 end
