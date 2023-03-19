@@ -91,7 +91,9 @@ function esp:add_character(c)
             --< set variables >--
             local hrp = c:WaitForChild('HumanoidRootPart', 1)
             local head = c:WaitForChild('Head', 1)
+            local human = c:WaitForChild('Humanoid', 1)
             local color = _G.Local.l_Player.Team == player.Team and esp.settings.team_color or esp.settings.enemy_color
+            if not hrp or not head then return end
             
             --< check distance >--
             if tools:Mag(_G.Local.l_HRP.Position, hrp.Position) > esp.settings.distance then return end
