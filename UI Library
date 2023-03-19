@@ -921,6 +921,10 @@ function library:update_theme(new_theme)
 	end
 	library.theme = new_theme
 end
+function library:new_theme(color_name, color)
+	library.theme[color_name] = color
+	library:update_theme(library.theme)
+end
 
 function library:text_bounds(Text, Size)
 	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
