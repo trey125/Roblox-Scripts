@@ -34,7 +34,8 @@ local mouse = game:GetService('Players').LocalPlayer:GetMouse()
 local library = {
 	connections = {},
 	reg = {},
-	ui_open = false
+	ui_open = false,
+	gui = Instance.new('ScreenGui', game.CoreGui)
 }
 library.theme = {
 	main = c3rgb(30, 30, 30),
@@ -50,7 +51,6 @@ library.theme = {
 	a_text = c3rgb(255, 255, 255),
 	i_text = c3rgb(150, 150, 150)
 }
-library.backup_theme = library.theme
 
 --< functions >--
 
@@ -330,8 +330,8 @@ function special:color(properties)
 	library:highlight(color_outer, color_outer, 'BackgroundColor3', 'accent', 'outline')
 	
 	-- return
-	self.Color_Instance = color_outer
-	return self
+	color.Instance = color_outer
+	return color
 end
 
 special.__index = special
@@ -922,27 +922,6 @@ function library:update_theme(new_theme)
 	end
 	library.theme = new_theme
 end
-function library:new_theme(color_name, color)
-	library.theme[color_name] = color
-	library:update_theme(library.theme)
-end
-function library:reset_theme()
-	library.theme = {
-		main = c3rgb(30, 30, 30),
-		bg = c3rgb(20, 20, 20),
-
-		dark_main = c3rgb(15, 15, 15),
-		dark_bg = c3rgb(10, 10, 10),
-
-		outline = c3rgb(50, 50, 50),
-		accent = c3rgb(170, 130, 255),
-
-		n_text = c3rgb(255, 255, 255),
-		a_text = c3rgb(255, 255, 255),
-		i_text = c3rgb(150, 150, 150)
-	}
-	library:update_theme(library.theme)
-end
 
 function library:text_bounds(Text, Size)
 	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
@@ -954,8 +933,6 @@ function library:menu(title)
 	}
 	
 	-- create elements
-	library.gui = Instance.new('ScreenGui', game.CoreGui)
-	
 	local outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
@@ -1292,6 +1269,174 @@ function library:menu(title)
 	end
 	
 	return menu
+end
+function library:custom_window(title, properties)
+	local window = {}
+	
+	-- create elements
+	local outer = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderSizePixel = 0,
+		BackgroundTransparency = properties.bt or 0,
+		Position = properties.position or u2n(0, 0, 0, 0),
+		Size = properties.size or u2n(0, 0, 0, 0),
+		ZIndex = 2,
+		Parent = library.gui
+	})
+	local accent = library:create('frame', {
+		BackgroundColor3 = library.theme.accent,
+		BorderSizePixel = 0,
+		Position = u2n(0, 5, 0, 1),
+		Size = u2n(1, -10, 0, 1),
+		ZIndex = 2,
+		Parent = outer
+	})
+	local content = library:create('frame', {
+		BackgroundTransparency = 1,
+		Position = u2n(0, 5, 0, 40),
+		Size = u2n(1, -10, 1, -45),
+		ZIndex = 2,
+		Parent = outer
+	})
+	local title = library:create('text', {
+		BackgroundTransparency = 1,
+		Position = u2n(0, 5, 0, 5),
+		Size = u2n(1, -10, 0, 15),
+		Text = title,
+		TextColor3 = library.theme.n_text,
+		ZIndex = 2,
+		Parent = outer
+	})
+	local layout = library:create('layout', {
+		Padding = un(0, 5),
+		FillDirection = Enum.FillDirection.Vertical,
+		Parent = content
+	})
+	
+	-- add to registry
+	library:add_to_registry(outer, {
+		BackgroundColor3 = 'main',
+	})
+	library:add_to_registry(accent, {
+		BackgroundColor3 = 'accent'
+	})
+	library:create(title, {
+		TextColor3 = 'n_text'
+	})
+	
+	-- functions
+	function window:label(title)
+		local label = {}
+
+		-- create elements
+		local label_instance = library:create('text', {
+			Size = u2n(.75, 0, 0, 20),
+			Text = title,
+			TextColor3 = library.theme.n_text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 2,
+			Parent = content
+		})
+		
+		outer.Size = u2n(outer.Size.X.Scale, outer.Size.X.Offset, 0, layout.AbsoluteContentSize.Y + 50)
+		
+		-- add to registry
+		library:add_to_registry(label_instance, {
+			['TextColor3'] = 'n_text'
+		})
+
+		-- return
+		label.Instance = label_instance
+		setmetatable(label, special)
+		return label
+	end
+	
+	-- return
+	window.Instance = outer
+	return window
+end
+function library:notification(title, text, duration)
+	-- create elements --
+	if not library.na then
+		library.na = library:create('frame', { 
+			BackgroundTransparency = 1, 
+			Position = u2n(1, -275, 0, -34), 
+			Size = u2n(0, 275, 1, 32),
+			ZIndex = 3,
+			Parent = library.gui
+		})
+		library:create('layout', {
+			FillDirection = Enum.FillDirection.Vertical,
+			VerticalAlignment = Enum.VerticalAlignment.Bottom,
+			Parent = library.na
+		})
+	end
+	
+	local notification_outer = library:create('frame', {
+		BackgroundColor3 = c3rgb(0, 0, 0),
+		BorderSizePixel = 0,
+		Size = u2n(1, 0, 0, 0),
+		ClipsDescendants = true,
+		Parent = library.na
+	})
+	local notification_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = library.theme.accent,
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = notification_outer
+	})
+	local notification_title = library:create('text', {
+		Position = u2n(0, 3, 0, 0),
+		Size = u2n(1, -6, 0, 25),
+		Text = title,
+		TextColor3 = library.theme.accent,
+		Parent = notification_inner
+	})
+	local notification_text = library:create('text', {
+		Position = u2n(0, 3, 0, 25),
+		Size = u2n(1, -6, 0, 40),
+		Text = text,
+		TextColor3 = library.theme.n_text,
+		Parent = notification_inner
+	})
+	local progress_bar = library:create('frame', {
+		BackgroundColor3 = library.theme.n_text,
+		BorderSizePixel = 0,
+		Position = u2n(0, 5, 0, 2),
+		Size = u2n(0, 0, 0, 1),
+		Parent = notification_inner
+	})
+	
+	-- add to registry
+	library:add_to_registry(notification_inner, {
+		['BackgroundColor3'] = 'main',
+		['BorderColor3'] = 'accent'
+	})
+	library:add_to_registry(notification_title, {
+		['TextColor3'] = 'accent'
+	})
+	library:add_to_registry(notification_text, {
+		['TextColor3'] = 'n_text'
+	})
+	library:add_to_registry(progress_bar, {
+		['BackgroundColor3'] = 'n_text'
+	})
+	
+	-- functions
+	local t = game.TweenService:Create(notification_outer, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), { Size = u2n(1, 0, 0, 75) })
+	t:Play()
+	t.Completed:Wait()
+	
+	local t2 = game.TweenService:Create(progress_bar, TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = u2n(1, -10, 0, 1) })
+	t2:Play()
+	t2.Completed:Wait()
+	
+	local t3 = game.TweenService:Create(notification_outer, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), { Size = u2n(1, 0, 0, 0) })
+	t3:Play()
+	t3.Completed:Wait()
+	notification_outer:Destroy()
 end
 
 _G.Sentra = library
