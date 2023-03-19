@@ -916,6 +916,7 @@ function library:update_theme(new_theme)
 			Data.Instance[Property] = new_theme[ColorIdx]
 		end
 	end
+	library.theme = new_theme
 end
 
 function library:text_bounds(Text, Size)
