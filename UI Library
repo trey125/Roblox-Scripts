@@ -926,6 +926,23 @@ function library:new_theme(color_name, color)
 	library.theme[color_name] = color
 	library:update_theme(library.theme)
 end
+function library:reset_theme()
+	library.theme = {
+		main = c3rgb(30, 30, 30),
+		bg = c3rgb(20, 20, 20),
+
+		dark_main = c3rgb(15, 15, 15),
+		dark_bg = c3rgb(10, 10, 10),
+
+		outline = c3rgb(50, 50, 50),
+		accent = c3rgb(170, 130, 255),
+
+		n_text = c3rgb(255, 255, 255),
+		a_text = c3rgb(255, 255, 255),
+		i_text = c3rgb(150, 150, 150)
+	}
+	library:update_theme(library.theme)
+end
 
 function library:text_bounds(Text, Size)
 	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
