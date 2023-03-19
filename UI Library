@@ -506,7 +506,7 @@ function base:toggle(properties)
 			toggle.value = value
 		end
 	end, true)
-	library:highlight(toggle_frame, toggle_inner, 'BorderColor3', { c = library.theme.accent, cn = 'accent' }, { c = library.theme.outline, cn = 'outline' }, true)
+	library:highlight(toggle_frame, toggle_inner, 'BorderColor3', 'accent', 'outline', true)
 	
 	-- return
 	toggle.Instance = toggle_frame
