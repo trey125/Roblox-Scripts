@@ -96,34 +96,34 @@ function esp:add_character(c)
             if not hrp or not head then return end
             
             --< check distance >--
-            if tools:Mag(_G.Local.l_HRP.Position, hrp.Position) > esp.settings.distance then return end
-            
-            --< check enabled >--
-            if not esp.settings.enabled then return end
-            
-            --< check w2s >--
-            local pos, vis = tools:W2S(hrp.Position)
-            local hpos, hvis = tools:W2S(head.Position)
-            if vis then
-                --< set esp elements >--
-                if esp.settings.name then esp_funcs:Set('Text', name, { Text = ('[%.0fm] %s'):format(tools:Mag(_G.Local.l_HRP.Position, hrp.Position), player.Name), Position = Vector2.new(hpos.X, hpos.Y), Color = color }) end
-                if esp.settings.chams then esp_funcs:Set('Cham', cham, { OutlineColor = Color3.fromRGB(0, 0, 0), FillColor = color }) end
-                if esp.settings.health then  end
-                if esp.settings.skeleton then esp_funcs:Set('Skeleton', nil, { Table = skeleton_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
-                if esp.settings.box_3d then esp_funcs:Set('3DBox', nil, { Table = box_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
-            else
-                --< check if enabled >--
-                if esp.settings.arrow then
-                    --< do off-screen stuff >--
-                    local dir = relative(hrp.Position, _G.Local.l_Char).unit
-                    
-                    local base = dir * 100 -- DistFromCenter
-                    
-                    local baseL = base + rotate(dir, 90) * 8
-                    local baseR = base + rotate(dir, -90) * 8
-                    local tip = dir * (116) -- DistFromCenter + 16
-                    
-                    esp_funcs:Set('Triangle', arrow, { PointA = relative_to_center(baseL), PointB = relative_to_center(baseR), PointC = relative_to_center(tip), Color = color })
+            if tools:Mag(_G.Local.l_HRP.Position, hrp.Position) <= esp.settings.distance then
+                --< check enabled >--
+                if esp.settings.enabled then
+                    --< check w2s >--
+                    local pos, vis = tools:W2S(hrp.Position)
+                    local hpos, hvis = tools:W2S(head.Position)
+                    if vis then
+                        --< set esp elements >--
+                        if esp.settings.name then esp_funcs:Set('Text', name, { Text = ('[%.0fm] %s'):format(tools:Mag(_G.Local.l_HRP.Position, hrp.Position), player.Name), Position = Vector2.new(hpos.X, hpos.Y), Color = color }) end
+                        if esp.settings.chams then esp_funcs:Set('Cham', cham, { OutlineColor = Color3.fromRGB(0, 0, 0), FillColor = color }) end
+                        if esp.settings.health then  end
+                        if esp.settings.skeleton then esp_funcs:Set('Skeleton', nil, { Table = skeleton_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
+                        if esp.settings.box_3d then esp_funcs:Set('3DBox', nil, { Table = box_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
+                    else
+                        --< check if enabled >--
+                        if esp.settings.arrow then
+                            --< do off-screen stuff >--
+                            local dir = relative(hrp.Position, _G.Local.l_Char).unit
+
+                            local base = dir * 100 -- DistFromCenter
+
+                            local baseL = base + rotate(dir, 90) * 8
+                            local baseR = base + rotate(dir, -90) * 8
+                            local tip = dir * (116) -- DistFromCenter + 16
+
+                            esp_funcs:Set('Triangle', arrow, { PointA = relative_to_center(baseL), PointB = relative_to_center(baseR), PointC = relative_to_center(tip), Color = color })
+                        end
+                    end
                 end
             end
         else
