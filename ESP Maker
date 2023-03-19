@@ -14,6 +14,9 @@ esp.settings = {}
 local esp_funcs = loadstring(game:HttpGet('https://raw.githubusercontent.com/trey125/Roblox-Scripts/main/Esp%20Library.lua'))()
 local tools = loadstring(game:HttpGet('https://raw.githubusercontent.com/trey125/Roblox-Scripts/main/Tool%20Library'))()
 
+--< init >--
+tools:Start()
+
 --< functions >--
 -- main
 function esp:stop()
