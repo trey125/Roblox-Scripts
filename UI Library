@@ -330,7 +330,8 @@ function special:color(properties)
 	library:highlight(color_outer, color_outer, 'BackgroundColor3', 'accent', 'outline')
 	
 	-- return
-	self.Color_Instance = color_outer
+	color.Color_Instance = color_outer
+	return color
 end
 
 special.__index = special
