@@ -331,7 +331,7 @@ function special:color(properties)
 	
 	-- return
 	self.Color_Instance = color_outer
-	return color
+	return self
 end
 
 special.__index = special
