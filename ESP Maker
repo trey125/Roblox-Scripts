@@ -143,9 +143,7 @@ function esp:add_player(p)
     --< create connection >--
     local conn
     conn = p.CharacterAdded:Connect(function(c)
-        print('character added')
         if esp:valid_player(p) then 
-            print('esp added')
             esp:add_character(c) 
         else conn:Disconnect() end
     end)
