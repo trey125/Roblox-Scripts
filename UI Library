@@ -914,6 +914,7 @@ end
 function library:remove_from_registry(inst)
 	table.remove(library.reg, library.reg[inst].Index)
 end
+
 function library:update_theme(new_theme)
 	for Object, Data in pairs(library.reg) do -- { Inner = <Table> Data = { <Instance> Instance, <Table> Properties, <Number> Index } }
 		for Property, ColorIdx in pairs(Data.Properties) do -- { ['BackgroundColor3'] = 'accent', ['BorderColor3'] = 'main' }
@@ -921,6 +922,27 @@ function library:update_theme(new_theme)
 		end
 	end
 	library.theme = new_theme
+end
+function library:new_theme(color_name, color)
+	library.theme[color_name] = color
+	library:update_theme(library.theme)
+end
+function library:reset_theme()
+	library.theme = {
+		main = c3rgb(30, 30, 30),
+		bg = c3rgb(20, 20, 20),
+
+		dark_main = c3rgb(15, 15, 15),
+		dark_bg = c3rgb(10, 10, 10),
+
+		outline = c3rgb(50, 50, 50),
+		accent = c3rgb(170, 130, 255),
+
+		n_text = c3rgb(255, 255, 255),
+		a_text = c3rgb(255, 255, 255),
+		i_text = c3rgb(150, 150, 150)
+	}
+	library:update_theme(library.theme)
 end
 
 function library:text_bounds(Text, Size)
@@ -1280,7 +1302,6 @@ function library:custom_window(title, properties)
 		BackgroundTransparency = properties.bt or 0,
 		Position = properties.position or u2n(0, 0, 0, 0),
 		Size = properties.size or u2n(0, 0, 0, 0),
-		Visible = properties.visible or true,
 		ZIndex = 2,
 		Parent = library.gui
 	})
