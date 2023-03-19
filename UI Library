@@ -1280,7 +1280,7 @@ function library:custom_window(title, properties)
 		BackgroundTransparency = properties.bt or 0,
 		Position = properties.position or u2n(0, 0, 0, 0),
 		Size = properties.size or u2n(0, 0, 0, 0),
-		Visible = properties.visible or true
+		Visible = properties.visible or true,
 		ZIndex = 2,
 		Parent = library.gui
 	})
