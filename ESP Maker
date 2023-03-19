@@ -1,0 +1,155 @@
+--< create tables >--
+local esp = {
+    connections = {}
+}
+local services = {
+    Players = game:GetService('Players'),
+    RS = game:GetService('ReplicatedStorage'),
+    Run = game:GetService('RunService')
+}
+esp.settings = {}
+
+--< get libraries >--
+--local esp = loadstring(game:HttpGet(''))()
+local esp_funcs = loadstring(game:HttpGet('https://raw.githubusercontent.com/trey125/Roblox-Scripts/main/Esp%20Library.lua'))()
+local tools = loadstring(game:HttpGet('https://raw.githubusercontent.com/trey125/Roblox-Scripts/main/Tool%20Library'))()
+
+--< functions >--
+-- main
+function esp:stop()
+    for i,v in pairs(esp.connections) do v:Disconnect() end
+    
+    esp_funcs:Stop()
+    tools:Stop()
+    
+    table.clear(esp)
+    table.clear(services)
+end
+
+-- checks
+function esp:valid_character(c)
+    return c and c.Parent and c:FindFirstChild('HumanoidRootPart') and c:FindFirstChild('Humanoid') and c.Humanoid.Health > 0
+end
+function esp:valid_player(p)
+    return p and services.Players:FindFirstChild(p.Name) and p.Parent == services.Players
+end
+function esp:valid_part(p)
+    return p and p.Parent and p:IsA('Part')
+end
+
+-- esp
+function rotate(p, r)
+    r = math.rad(r) -- math.rad / degrees * (pi / 180)
+    local x = p.x * math.cos(r) - p.y * math.sin(r) -- trig
+    local y = p.x * math.sin(r) + p.y * math.cos(r) -- trig
+    
+    return Vector2.new(x, y)
+end
+function relative(pos, c)
+    if not c then return Vector2.new(0, 0) end
+    
+    local rootP = c.PrimaryPart.Position
+    local camP = _G.Local.Cam.CFrame.Position
+    local rel = CFrame.new(Vector3.new(rootP.X, camP.Y, rootP.Z), camP):PointToObjectSpace(pos)
+    
+    return Vector2.new(rel.X, rel.Z)
+end
+function relative_to_center(n)
+    return _G.Local.Cam.ViewportSize / 2 - n
+end
+
+function esp:add_character(c)
+    --< find player >--
+    local player = services.Players:FindFirstChild(c.Name) or nil
+    if player == nil then return nil end
+    
+    --< create esp elements >--
+    local name = esp_funcs:New('Text', {})
+    local cham = esp_funcs:New('Cham', { Adornee = c })
+    local arrow = esp_funcs:New('Triangle', { Color = Color3.fromRGB(255, 255, 255) })
+    local skeleton_table = esp_funcs:New('Skeleton', { Thickness = 2 })
+    local box_table = esp_funcs:New('3DBox', { Thickness = 2 })
+    
+    --< wait >--
+    repeat wait() until c:FindFirstChild('Humanoid')
+    
+    --< create connection >--
+    local conn
+    conn = services.Run.RenderStepped:Connect(function()
+        --< check valid >--
+        if esp:valid_player(player) and esp:valid_character(c) then
+            --< set esp elements invisible >--
+            name.Visible = false
+            cham.Enabled = false
+            arrow.Visible = false
+            for i,v in pairs(skeleton_table) do v.Visible = false end
+            for i,v in pairs(box_table) do v.Visible = false end
+            
+            --< set variables >--
+            local hrp = c:WaitForChild('HumanoidRootPart', 1)
+            local head = c:WaitForChild('Head', 1)
+            local color = _G.Local.l_Player.Team == player.Team and esp.settings.team_color or esp.settings.enemy_color
+            
+            --< check distance >--
+            if tools:Mag(_G.Local.l_HRP.Position, hrp.Position) > esp.settings.distance then return end
+            
+            --< check enabled >--
+            if not esp.settings.enabled then return end
+            
+            --< check w2s >--
+            local pos, vis = tools:W2S(hrp.Position)
+            local hpos, hvis = tools:W2S(head.Position)
+            if vis then
+                --< set esp elements >--
+                if esp.settings.name then esp_funcs:Set('Text', name, { Text = ('[%.0fm] %s'):format(tools:Mag(_G.Local.l_HRP.Position, hrp.Position), player.Name), Position = Vector2.new(hpos.X, hpos.Y), Color = color }) end
+                if esp.settings.chams then esp_funcs:Set('Cham', cham, { OutlineColor = Color3.fromRGB(0, 0, 0), FillColor = color }) end
+                if esp.settings.health then  end
+                if esp.settings.skeleton then esp_funcs:Set('Skeleton', nil, { Table = skeleton_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
+                if esp.settings.box_3d then esp_funcs:Set('3DBox', nil, { Table = box_table, Cam = _G.Local.Cam, Character = c, Color = color }) end
+            else
+                --< check if enabled >--
+                if esp.settings.arrow then
+                    --< do off-screen stuff >--
+                    local dir = relative(hrp.Position, _G.Local.l_Char).unit
+                    
+                    local base = dir * 100 -- DistFromCenter
+                    
+                    local baseL = base + rotate(dir, 90) * 8
+                    local baseR = base + rotate(dir, -90) * 8
+                    local tip = dir * (116) -- DistFromCenter + 16
+                    
+                    esp_funcs:Set('Triangle', arrow, { PointA = relative_to_center(baseL), PointB = relative_to_center(baseR), PointC = relative_to_center(tip), Color = color })
+                end
+            end
+        else
+            --< remove esp elements >--
+            name:Remove()
+            cham:Destroy()
+            arrow:Remove()
+            for i,v in pairs(skeleton_table) do v:Remove() end
+            for i,v in pairs(box_table) do v:Remove() end
+            
+            --< remove connection >--
+            conn:Disconnect()
+            conn = nil
+        end
+    end)
+    esp.connections[c.Name .. '_char'] = conn
+end
+function esp:add_player(p)
+    --< create connection >--
+    local conn
+    conn = p.CharacterAdded:Connect(function(c)
+        print('character added')
+        if esp:valid_player(p) then 
+            print('esp added')
+            esp:add_character(c) 
+        else conn:Disconnect() end
+    end)
+    if p.Character then 
+        pcall(function() esp:add_character(p.Character) end)
+    end
+    esp.connections[p.Name .. '_plr'] = conn
+end
+
+return esp
