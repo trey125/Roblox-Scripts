@@ -40,13 +40,13 @@ local library = {
 library.theme = {
 	main = c3rgb(30, 30, 30),
 	bg = c3rgb(20, 20, 20),
-	
+
 	dark_main = c3rgb(15, 15, 15),
 	dark_bg = c3rgb(10, 10, 10),
-	
+
 	outline = c3rgb(50, 50, 50),
 	accent = c3rgb(170, 130, 255),
-	
+
 	n_text = c3rgb(255, 255, 255),
 	a_text = c3rgb(255, 255, 255),
 	i_text = c3rgb(150, 150, 150)
@@ -59,10 +59,10 @@ local special = {}
 
 function special:keybind(properties)
 	local keybind = {}
-	
+
 	local bind = properties.bind or 'none'
 	local watching = false
-	
+
 	local shortened = {
 		[Enum.KeyCode.LeftAlt] = 'LAlt',
 		[Enum.KeyCode.RightAlt] = 'RAlt',
@@ -81,6 +81,27 @@ function special:keybind(properties)
 		[Enum.KeyCode.Nine] = '9',
 		[Enum.KeyCode.Zero] = '0'
 	}
+	local key_word = {
+		['LAlt'] = Enum.KeyCode.LeftAlt,
+		['RAlt'] = Enum.KeyCode.RightAlt,
+		['LShift'] = Enum.KeyCode.LeftShift,
+		['RShift'] = Enum.KeyCode.RightShift,
+		['LCtrl'] = Enum.KeyCode.LeftControl,
+		['RCtrl'] = Enum.KeyCode.RightControl,
+		['1'] = Enum.KeyCode.One,
+		['2'] = Enum.KeyCode.Two,
+		['3'] = Enum.KeyCode.Three,
+		['4'] = Enum.KeyCode.Four,
+		['5'] = Enum.KeyCode.Five,
+		['6'] = Enum.KeyCode.Six,
+		['7'] = Enum.KeyCode.Seven,
+		['8'] = Enum.KeyCode.Eight,
+		['9'] = Enum.KeyCode.Nine,
+		['0'] = Enum.KeyCode.Zero,
+		
+		['End'] = Enum.KeyCode.End
+	}
+	
 	local blacklisted = {
 		Enum.KeyCode.Slash,
 		Enum.KeyCode.Escape,
@@ -91,7 +112,7 @@ function special:keybind(properties)
 		[Enum.UserInputType.MouseButton2] = 'MB2',
 		[Enum.UserInputType.MouseButton3] = 'MB3'
 	}
-	
+
 	-- create elements
 	local keybind_label = library:create('text', {
 		Position = u2n(1.15, 0, 0, 0),
@@ -103,18 +124,19 @@ function special:keybind(properties)
 	})
 	
 	if bind ~= 'none' then
-		if shortened[bind] then
-			keybind_label.Text = '[' .. shortened[bind] .. ']'
-		elseif bind.Name then
-			keybind_label.Text = '[' .. bind.Name .. ']'
+		if type(bind) == 'string' then
+			if key_word[bind] then keybind_label.Text = '[' .. key_word .. ']' end
+		else
+			if shortened[bind] then keybind_label.Text = '[' .. shortened[bind] .. ']'
+			elseif bind.Name then keybind_label.Text = '[' .. bind.Name .. ']' end
 		end
 	end
-	
+
 	-- add to registry
 	library:add_to_registry(keybind_label, {
 		['TextColor3'] = 'i_text'
 	})
-	
+
 	-- functions
 	library:conn(uis.InputBegan, function(i, gpe)
 		if not gpe then
@@ -125,12 +147,6 @@ function special:keybind(properties)
 						keybind_label.Text = shortened[i.KeyCode] and '[' .. shortened[i.KeyCode] .. ']' or '[' .. i.KeyCode.Name .. ']'
 						watching = false
 					end
-				else
-					--[[
-					bind = i.KeyCode
-					keybind_label.Text = '[' .. mouse_keys[i.UserInputType] .. ']'
-					watching = false
-					]]--
 				end
 			else
 				if i.KeyCode == bind then
@@ -143,7 +159,7 @@ function special:keybind(properties)
 			end
 		end
 	end)
-	
+
 	library:conn(keybind_label.InputBegan, function(i)
 		if i.UserInputType == Enum.UserInputType.MouseButton1 then
 			keybind_label.Text = '[...]'
@@ -151,16 +167,16 @@ function special:keybind(properties)
 			watching = true
 		end
 	end)
-	
+
 	-- return
 	keybind.Instance = keybind_label
 	return keybind
 end
 function special:color(properties)
 	local color = {}
-	
+
 	local value = properties.default or properties.color or c3rgb(255, 255, 255)
-	
+
 	-- create elements
 	local color_outer = library:create('frame', {
 		BackgroundColor3 = library.theme.outline,
@@ -177,7 +193,7 @@ function special:color(properties)
 		Size = u2n(1, -2, 1, -2),
 		Parent = color_outer
 	})
-	
+
 	local content_outer = library:create('frame', {
 		BackgroundColor3 = library.theme.bg,
 		BorderColor3 = c3rgb(0, 0, 0),
@@ -201,10 +217,10 @@ function special:color(properties)
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = content_inner
 	})
-	
+
 	for i=1,3 do
 		local dragging = false
-		
+
 		-- create elements
 		local slider_frame = library:create('frame', {
 			BackgroundTransparency = 1,
@@ -244,16 +260,16 @@ function special:color(properties)
 			ZIndex = 8,
 			Parent = slider_frame
 		})
-		
+
 		if i == 2 then 
 			slider_title.Text = 'G: ' .. tostring(value.G * 255)
 			slider_color.Size = u2n(value.G / 1, 0, 1, 0)
 		elseif i == 3 then 
 			slider_title.Text = 'B: ' .. tostring(value.B * 255) 
 			slider_color.Size = u2n(value.B / 1, 0, 1, 0)
-			
+
 		end
-		
+
 		-- add to registry
 		library:add_to_registry(slider_outer, {
 			['BackgroundColor3'] = 'bg'
@@ -267,7 +283,7 @@ function special:color(properties)
 		library:add_to_registry(slider_title, {
 			['TextColor3'] = 'a_text'
 		})
-		
+
 		-- functions
 		local function value_changed()
 			slider_color.Size = u2n(0, math.clamp((mouse.x - slider_inner.AbsolutePosition.X), 0, slider_inner.AbsolutePosition.X), 1, 0)
@@ -276,28 +292,28 @@ function special:color(properties)
 			local nvalue = math.clamp(1 * math.floor(new_value / 1), 0, 255)
 
 			slider_color.Size = u2n(nvalue / 255, 0, 1, 0)
-			
+
 			if i == 1 then
 				value = c3rgb(nvalue, value.G * 255, value.B * 255)
-				
+
 				slider_title.Text = 'R: ' .. tostring(math.round(value.R * 255))
 				color_inner.BackgroundColor3 = value
 				if properties.callback then properties.callback(value) end
 			elseif i == 2 then 
 				value = c3rgb(value.R * 255, nvalue, value.B * 255)
-				
+
 				slider_title.Text = 'G: ' .. tostring(math.round(value.G * 255))
 				color_inner.BackgroundColor3 = value
 				if properties.callback then properties.callback(value) end
 			elseif i == 3 then 
 				value = c3rgb(value.R * 255, value.G * 255, nvalue)
-				
+
 				slider_title.Text = 'B: ' .. tostring(math.round(value.B * 255))
 				color_inner.BackgroundColor3 = value
 				if properties.callback then properties.callback(value) end
 			end
 		end
-		
+
 		library:mousedown(slider_outer, function()
 			dragging = true
 			value_changed()
@@ -309,7 +325,7 @@ function special:color(properties)
 			if dragging then value_changed() end
 		end)
 	end
-	
+
 	-- add to registry
 	library:add_to_registry(color_outer, {
 		['BackgroundColor3'] = 'outline'
@@ -320,15 +336,15 @@ function special:color(properties)
 	library:add_to_registry(content_inner, {
 		['BackgroundColor3'] = 'main'
 	})
-	
+
 	-- functions
 	library:mousedown(color_outer, function()
 		content_outer.Visible = not content_outer.Visible
 		library.ui_open = content_outer.Visible
 	end, false)
-	
+
 	library:highlight(color_outer, color_outer, 'BackgroundColor3', 'accent', 'outline')
-	
+
 	-- return
 	color.Color_Instance = color_outer
 	return color
@@ -343,7 +359,7 @@ local base = {}
 
 function base:label(properties)
 	local label = {}
-	
+
 	-- create elements
 	local label_instance = library:create('text', {
 		Size = u2n(.75, 0, 0, 20),
@@ -353,17 +369,17 @@ function base:label(properties)
 		ZIndex = 2,
 		Parent = self.container
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(label_instance, {
 		['TextColor3'] = 'n_text'
 	})
-	
+
 	-- functions
 	function label:update(new_properties)
 		if new_properties.text then label_instance.Text = new_properties.text end
 	end
-	
+
 	-- return
 	label.Instance = label_instance
 	setmetatable(label, special)
@@ -371,7 +387,7 @@ function base:label(properties)
 end
 function base:button(properties)
 	local button = {}
-	
+
 	-- create elements
 	local button_outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
@@ -393,7 +409,7 @@ function base:button(properties)
 		TextColor3 = library.theme.n_text,
 		Parent = button_inner
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(button_inner, {
 		['BackgroundColor3'] = 'main',
@@ -402,18 +418,18 @@ function base:button(properties)
 	library:add_to_registry(button_title, {
 		['TextColor3'] = 'n_text'
 	})
-	
+
 	-- functions
 	function button:update(new_properties)
 		if new_properties.callback then properties.callback = new_properties.callback end
 		if new_properties.text then button_title.Text = new_properties.text end
 	end
-	
+
 	library:mousedown(button_outer, function()
 		if properties.callback then properties.callback() end
 	end, true)
 	library:highlight(button_outer, button_inner, 'BorderColor3', 'accent', 'outline', true)
-	
+
 	-- return
 	button.Instance = button_outer
 	return button
@@ -421,7 +437,7 @@ end
 function base:toggle(properties)
 	local toggle = {}
 	local value = properties.default or false
-	
+
 	-- create elements
 	local toggle_frame = library:create('frame', {
 		BackgroundTransparency = 1,
@@ -449,7 +465,7 @@ function base:toggle(properties)
 		Size = u2n(1, -2, 1, -2),
 		Parent = toggle_inner
 	})
-	
+
 	local toggle_title = library:create('text', {
 		Position = u2n(0, 20, 0, -1),
 		Size = u2n(1, -20, 1, 0),
@@ -458,7 +474,7 @@ function base:toggle(properties)
 		TextColor3 = value and library.theme.a_text or library.theme.i_text,
 		Parent = toggle_frame
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(toggle_inner, {
 		['BackgroundColor3'] = 'bg',
@@ -470,7 +486,7 @@ function base:toggle(properties)
 	library:add_to_registry(toggle_title, {
 		['TextColor3'] = value and 'a_text' or 'i_text'
 	})
-	
+
 	-- functions
 	function toggle:update(new_properties)
 		if new_properties.callback then properties.callback = new_properties.callback end
@@ -482,17 +498,17 @@ function base:toggle(properties)
 	function toggle:change_val(new)
 		value = new
 		toggle.value = value
-		
+
 		toggle_color.BackgroundColor3 = value and library.theme.accent or library.theme.main
 		library.reg[toggle_color].Properties['BackgroundColor3'] = value and 'accent' or 'main'
 
 		toggle_title.TextColor3 = value and library.theme.a_text or library.theme.i_text
 		library.reg[toggle_title].Properties['TextColor3'] = value and 'a_text' or 'i_text'
-		
+
 		toggle_inner.BorderColor3 = value and library.theme.accent or library.theme.outline
 		library.reg[toggle_inner].Properties['BorderColor3'] = value and 'accent' or 'outline'
 	end
-	
+
 	library:mousedown(toggle_frame, function()
 		value = not value
 
@@ -508,7 +524,7 @@ function base:toggle(properties)
 		end
 	end, true)
 	library:highlight(toggle_frame, toggle_inner, 'BorderColor3', 'accent', 'outline', true)
-	
+
 	-- return
 	toggle.Instance = toggle_frame
 	toggle.value = value
@@ -518,15 +534,15 @@ function base:toggle(properties)
 end
 function base:slider(properties)
 	local slider = {}
-	
+
 	local value = properties.default or 0
 	local min = properties.min or 0
 	local max = properties.max or 100
 	local prefix = properties.prefix or ''
 	local increment = properties.inc or properties.increment or 1
-	
+
 	local dragging = false
-	
+
 	-- create elements
 	local slider_frame = library:create('frame', {
 		BackgroundTransparency = 1,
@@ -554,7 +570,7 @@ function base:slider(properties)
 		Size = u2n(value / max, 0, 1, 0),
 		Parent = slider_inner
 	})
-	
+
 	local slider_title = library:create('text', {
 		Size = u2n(1, 0, 0, 20),
 		Text = properties.text .. ': ' .. tostring(value) .. prefix,
@@ -562,7 +578,7 @@ function base:slider(properties)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = slider_frame
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(slider_outer, {
 		['BackgroundColor3'] = 'outline'
@@ -576,25 +592,25 @@ function base:slider(properties)
 	library:add_to_registry(slider_title, {
 		['TextColor3'] = 'n_text'
 	})
-	
+
 	-- functions
 	local function value_changed()
 		slider_color.Size = u2n(0, math.clamp((mouse.x - slider_inner.AbsolutePosition.X), 0, slider_inner.AbsolutePosition.X), 1, 0)
-		
+
 		local new_value = (slider_color.Size.X.Offset / slider_inner.AbsoluteSize.X) * (max - min) + min
 		value = math.clamp(increment * math.floor(new_value / increment), min, max)
-		
+
 		slider_title.Text = properties.text .. ': ' .. tostring(value) .. prefix
 		slider_color.Size = u2n(value / max, 0, 1, 0)
-		
+
 		if properties.callback then properties.callback(value) end
 	end
-	
+
 	function slider:update(new_properties)
 		if new_properties.callback then properties.callback = new_properties.callback end
 		if new_properties.value then value = new_properties.value value_changed() end
 	end
-	
+
 	library:mousedown(slider_outer, function()
 		dragging = true
 		value_changed()
@@ -606,18 +622,18 @@ function base:slider(properties)
 		if dragging then value_changed() end
 	end)
 	library:highlight(slider_outer, slider_outer, 'BackgroundColor3', 'accent', 'outline', true)
-	
+
 	-- return
 	slider.Instance = slider_frame
 	return slider
 end
 function base:dropdown(properties)
 	local dropdown = {}
-	
+
 	local values = properties.values
 	local value_buttons = {}
 	local chosen = properties.default or 'none'
-	
+
 	-- create elements
 	local dropdown_frame = library:create('frame', {
 		BackgroundTransparency = 1,
@@ -663,7 +679,7 @@ function base:dropdown(properties)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = dropdown_frame
 	})
-	
+
 	local dropdown_content_outer = library:create('frame', {
 		BackgroundColor3 = library.theme.outline,
 		BorderColor3 = c3rgb(0, 0, 0),
@@ -689,7 +705,7 @@ function base:dropdown(properties)
 	})
 	for i,v in pairs(values) do
 		local btn = {}
-		
+
 		-- create elements
 		local btn_frame = library:create('frame', {
 			BackgroundTransparency = 1,
@@ -708,7 +724,7 @@ function base:dropdown(properties)
 			ZIndex = 5,
 			Parent = btn_frame
 		})
-		
+
 		-- add to registry
 		library:add_to_registry(btn_frame, {
 			['BackgroundColor3'] = 'main'
@@ -716,18 +732,18 @@ function base:dropdown(properties)
 		library:add_to_registry(btn_title, {
 			['TextColor3'] = 'i_text'
 		})
-		
+
 		if chosen == v then
 			btn_frame.BackgroundTransparency = 0
-			
+
 			btn_title.TextColor3 = library.theme.a_text
 			library.reg[btn_title].Properties['TextColor3'] = 'a_text'
 		end
-		
+
 		-- functions
 		function btn:Hide()
 			btn_frame.BackgroundTransparency = 1
-			
+
 			btn_title.TextColor3 = library.theme.i_text
 			library.reg[btn_title].Properties['TextColor3'] = 'i_text'
 		end
@@ -737,21 +753,21 @@ function base:dropdown(properties)
 			btn_title.TextColor3 = library.theme.a_text
 			library.reg[btn_title].Properties['TextColor3'] = 'a_text'
 		end
-		
+
 		library:mousedown(btn_frame, function()
 			for i,v in pairs(value_buttons) do v:Hide() end
 			btn:Show()
-			
+
 			chosen = v
 			dropdown_value.Text = v
 			if properties.callback then properties.callback(v) end
 		end, false)
-		
+
 		-- return
 		btn.Instance = btn_frame
 		value_buttons[v] = btn
 	end
-	
+
 	-- add to registry
 	library:add_to_registry(dropdown_button_outer, {
 		['BackgroundColor3'] = 'outline'
@@ -771,7 +787,7 @@ function base:dropdown(properties)
 	library:add_to_registry(dropdown_content_inner, {
 		['BackgroundColor3'] = 'dark_main'
 	})
-	
+
 	-- functions
 	function dropdown:update(new_properties)
 		if new_properties.callback then properties.callback = new_properties.callback end
@@ -780,19 +796,19 @@ function base:dropdown(properties)
 			if value_buttons[new_properties.value] then
 				chosen = new_properties.value
 				dropdown_value.Text = new_properties.value
-				
+
 				for i,v in pairs(value_buttons) do v:Hide() end
 				value_buttons[new_properties.value]:Show()
 			end
 		end
 	end
-	
+
 	library:mousedown(dropdown_button_outer, function()
 		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
 		library.ui_open = dropdown_content_outer.Visible
 	end, false)
 	library:highlight(dropdown_button_outer, dropdown_button_outer, 'BackgroundColor3', 'accent', 'outline', false)
-	
+
 	-- return
 	dropdown.Instance = dropdown_frame
 	return dropdown
@@ -807,10 +823,10 @@ function library:unload()
 	for i,v in pairs(self.connections) do
 		v:Disconnect()
 	end
-	
+
 	if library.gui then library.gui:Destroy() end
 	if library.unload_callback then library.unload_callback() end
-	
+
 	t_clear(library)
 	_G.Sentra = nil
 end
@@ -825,23 +841,23 @@ function library:create(class, ...)
 		['Image'] = 'ImageLabel',
 		['image'] = 'ImageLabel'
 	}
-	
+
 	if type(class) ~= 'string' then return 'class was not a <string>' end
-	
+
 	class = Shortened[class]
-	
+
 	local i = Instance.new(class)
 	for Property, Value in pairs(Args) do
 		i[Property] = Value
 	end
-	
+
 	if class == 'TextLabel' then
 		if not Args['BackgroundTransparency'] then i['BackgroundTransparency'] = 1 end
 		i['Font'] = Enum.Font.RobotoMono
 		i['TextSize'] = 14
 		i['TextStrokeTransparency'] = 0
 	end
-	
+
 	return i
 end
 
@@ -880,22 +896,22 @@ function library:mouseup(inst, callback)
 end
 function library:draggable(inst)
 	inst.Active = true
-	
+
 	library:conn(inst.InputBegan, function(i)
 		if i.UserInputType == Enum.UserInputType.MouseButton1 then
 			local pos = v2n(mouse.X - inst.AbsolutePosition.X, mouse.Y - inst.AbsolutePosition.Y)
 			if pos.Y > 15 then return end
-			
+
 			while uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
 				local new_pos = u2n(0, mouse.x - pos.X + (inst.Size.X.Offset * inst.AnchorPoint.X), 0, mouse.Y - pos.Y + (inst.Size.Y.Offset * inst.AnchorPoint.Y))
-				
+
 				if new_pos.X.Offset < 2 then new_pos = u2n(0, 2, 0, new_pos.Y.Offset) end
 				if new_pos.X.Offset + inst.Size.X.Offset > 1918 then new_pos = u2n(0, 1918 - inst.Size.X.Offset, 0, new_pos.Y.Offset) end
 				if new_pos.Y.Offset < -34 then new_pos = u2n(0, new_pos.X.Offset, 0, -34) end
 				if new_pos.Y.Offset + inst.Size.Y.Offset > 1042 then new_pos = u2n(0, new_pos.X.Offset, 0, 1042 - inst.Size.Y.Offset) end
-				
+
 				inst.Position = new_pos
-					
+
 				rs.RenderStepped:Wait()
 			end
 		end
@@ -908,7 +924,7 @@ function library:add_to_registry(inst, prop)
 		Properties = prop, -- { 'TextColor3' = 'FontColor' }
 		Index = #library.reg + 1
 	}
-	
+
 	library.reg[inst] = data
 end
 function library:remove_from_registry(inst)
@@ -944,6 +960,34 @@ function library:reset_theme()
 	}
 	library:update_theme(library.theme)
 end
+function library:apply_settings(tab)
+	assert(tab.section, 'library:apply_settings() takes {tab} as an argument.')
+	
+	-- create sections
+	local s_theme = tab:section('theme', 0)
+	local m_theme = tab:section('main', 1)
+	local theme_stuff = {}
+	
+	-- create s_theme stuff
+	for i,v in pairs(library.theme) do
+		local btn = s_theme:label({ text = i }):color({ default = v, callback = function(val) library:update_theme(i, val) end })
+		table.insert(theme_stuff, {
+			Table = btn,
+			Name = i
+		})
+	end
+	local reset_button = s_theme:button({ text = 'reset to default', callback = function()
+		library:reset_theme()
+		for i,v in pairs(theme_stuff) do
+			v.Table.Color_Instance.Frame.BackgroundColor3 = library.theme[v.Name]
+		end
+	end })
+	
+	-- create m_theme stuff
+	m_theme:button({ text = 'unload', function() library:unload() end })
+	m_theme:label({ text = 'unload bind' }):keybind({ bind = 'End', callback = function() library:unload() end })
+	m_theme:label({ text = 'toggle ui bind' }):keybind({ bind = 'RAlt', callback = function() library.menu:toggle() end })
+end
 
 function library:text_bounds(Text, Size)
 	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
@@ -953,7 +997,7 @@ function library:menu(title)
 	local menu = {
 		tabs = {}
 	}
-	
+
 	-- create elements
 	local outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
@@ -984,7 +1028,7 @@ function library:menu(title)
 		Size = u2n(1, -2, 1, -2),
 		Parent = main_outer
 	})
-	
+
 	local button_area_outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
@@ -1000,7 +1044,7 @@ function library:menu(title)
 		Size = u2n(1, -2, 1, -2),
 		Parent = button_area_outer
 	})
-	
+
 	local section_area_outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
@@ -1016,7 +1060,7 @@ function library:menu(title)
 		Size = u2n(1, -2, 1, -2),
 		Parent = section_area_outer
 	})
-	
+
 	local title = library:create('text', {
 		Position = u2n(0, 5, 0, 0),
 		Size = u2n(1, -10, 0, 20),
@@ -1024,14 +1068,14 @@ function library:menu(title)
 		TextColor3 = library.theme.n_text,
 		Parent = inner
 	})
-	
+
 	local button_layout = library:create('layout', {
 		FillDirection = Enum.FillDirection.Horizontal,
 		Parent = button_area_inner
 	})
-	
+
 	library:draggable(outer)
-	
+
 	-- add to registry
 	library:add_to_registry(inner, {
 		['BackgroundColor3'] = 'main',
@@ -1044,33 +1088,33 @@ function library:menu(title)
 	library:add_to_registry(main_inner, {
 		['BackgroundColor3'] = 'bg',
 	})
-	
+
 	library:add_to_registry(button_area_inner, {
 		['BackgroundColor3'] = 'bg',
 		['BorderColor3'] = 'outline',
 	})
-	
+
 	library:add_to_registry(section_area_inner, {
 		['BackgroundColor3'] = 'main',
 		['BorderColor3'] = 'outline',
 	})
-	
+
 	library:add_to_registry(title, {
 		['TextColor3'] = 'n_text'
 	})
-	
-	
-	
+
+
+
 	-- functions
 	function menu:toggle()
 		library.gui.Enabled = not library.gui.Enabled
 	end
 	function menu:tab(name)
 		local tab = {}
-		
+
 		-- get text bounds
 		local size = library:text_bounds(name, 14)
-		
+
 		-- create elements
 		local tab_frame = library:create('frame', {
 			BackgroundColor3 = library.theme.dark_bg,
@@ -1084,7 +1128,7 @@ function library:menu(title)
 			TextColor3 = library.theme.i_text,
 			Parent = tab_frame
 		})
-		
+
 		local tab_content_frame = library:create('frame', {
 			BackgroundTransparency = 1,
 			Size = u2n(1, 0, 1, 0),
@@ -1103,7 +1147,7 @@ function library:menu(title)
 			Size = u2n(.5, -16, 1, -16),
 			Parent = tab_content_frame
 		})
-		
+
 		local left_layout = library:create('layout', {
 			FillDirection = Enum.FillDirection.Vertical,
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -1113,7 +1157,7 @@ function library:menu(title)
 
 		local right_layout = left_layout:Clone()
 		right_layout.Parent	= right_side
-		
+
 		-- add to registry
 		library:add_to_registry(tab_frame, {
 			['BackgroundColor3'] = 'dark_bg',
@@ -1122,20 +1166,20 @@ function library:menu(title)
 		library:add_to_registry(tab_title, {
 			['TextColor3'] = 'i_text'
 		})
-		
-		
+
+
 		-- functions
 		function tab:show()
 			for i,v in pairs(menu.tabs) do
 				v:hide()
 			end
-			
+
 			tab_frame.BackgroundColor3 = library.theme.dark_main
 			tab_title.TextColor3 = library.theme.accent
 
 			library.reg[tab_frame].Properties['BackgroundColor3'] = 'dark_main'
 			library.reg[tab_title].Properties['TextColor3'] = 'accent'
-			
+
 			tab_content_frame.Visible = true
 		end
 		function tab:hide()
@@ -1149,9 +1193,9 @@ function library:menu(title)
 		end
 		function tab:section(name, side)
 			local section = {}
-			
+
 			local size2 = library:text_bounds(name, 14)
-			
+
 			-- create elements
 			local section_outer = library:create('frame', {
 				BackgroundColor3 = c3rgb(0, 0, 0),
@@ -1167,7 +1211,7 @@ function library:menu(title)
 				ZIndex = 1,
 				Parent = section_outer
 			})
-			
+
 			local blocker = library:create('frame', {
 				BackgroundColor3 = library.theme.main,
 				BorderSizePixel = 0,
@@ -1192,7 +1236,7 @@ function library:menu(title)
 				ZIndex = 4,
 				Parent = section_inner
 			})
-			
+
 			local content = library:create('frame', {
 				BackgroundTransparency = 1,
 				Position = u2n(0, 5, 0, 10),
@@ -1205,7 +1249,7 @@ function library:menu(title)
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				Parent = content
 			})
-			
+
 			-- add to registry
 			library:add_to_registry(section_inner, {
 				['BackgroundColor3'] = 'bg',
@@ -1220,16 +1264,16 @@ function library:menu(title)
 			library:add_to_registry(section_title, {
 				['TextColor3'] = 'n_text'
 			})
-			
-			
+
+
 			-- functions
 			local function resize()
 				section_outer.Size = u2n(1, 0, 0, layout.AbsoluteContentSize.Y + 15)
 			end
-			
+
 			function section:seperator(properties)
 				local seperator = {}
-				
+
 				-- create elements
 				local seperator_frame = library:create('frame', {
 					BackgroundTransparency = 1,
@@ -1253,7 +1297,7 @@ function library:menu(title)
 					TextColor3 = library.theme.a_text,
 					Parent = seperator_frame
 				})
-				
+
 				-- add to registry
 				library:add_to_registry(seperator_accent, {
 					['BackgroundColor3'] = 'accent'
@@ -1262,39 +1306,40 @@ function library:menu(title)
 					['BackgroundColor3'] = 'bg',
 					['TextColor3'] = 'n_text'
 				})
-				
+
 				-- functions
 				function seperator:update(new_properties)
 					seperator_title.Text = new_properties.text
 				end
-				
+
 				-- return
 				seperator.Instance = seperator_frame
 				return seperator
 			end
-			
+
 			library:conn(layout:GetPropertyChangedSignal('AbsoluteContentSize'), resize)
 			section.container = content
 			setmetatable(section, base)
-			
+
 			-- return
 			return section
 		end
-		
-		
+
+
 		library:conn(tab_frame.InputBegan, function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then tab:show() end end)
 		if #button_area_inner:GetChildren() == 2 then tab:show() end
 		menu.tabs[name] = tab
-		
+
 		-- return
 		return tab
 	end
 	
+	library.menu = menu
 	return menu
 end
 function library:custom_window(title, properties)
 	local window = {}
-	
+
 	-- create elements
 	local outer = library:create('frame', {
 		BackgroundColor3 = library.theme.main,
@@ -1334,7 +1379,7 @@ function library:custom_window(title, properties)
 		FillDirection = Enum.FillDirection.Vertical,
 		Parent = content
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(outer, {
 		BackgroundColor3 = 'main',
@@ -1345,7 +1390,7 @@ function library:custom_window(title, properties)
 	library:create(title, {
 		TextColor3 = 'n_text'
 	})
-	
+
 	-- functions
 	function window:label(title)
 		local label = {}
@@ -1359,9 +1404,9 @@ function library:custom_window(title, properties)
 			ZIndex = 2,
 			Parent = content
 		})
-		
+
 		outer.Size = u2n(outer.Size.X.Scale, outer.Size.X.Offset, 0, layout.AbsoluteContentSize.Y + 50)
-		
+
 		-- add to registry
 		library:add_to_registry(label_instance, {
 			['TextColor3'] = 'n_text'
@@ -1372,7 +1417,7 @@ function library:custom_window(title, properties)
 		setmetatable(label, special)
 		return label
 	end
-	
+
 	-- return
 	window.Instance = outer
 	return window
@@ -1393,7 +1438,7 @@ function library:notification(title, text, duration)
 			Parent = library.na
 		})
 	end
-	
+
 	local notification_outer = library:create('frame', {
 		BackgroundColor3 = c3rgb(0, 0, 0),
 		BorderSizePixel = 0,
@@ -1430,7 +1475,7 @@ function library:notification(title, text, duration)
 		Size = u2n(0, 0, 0, 1),
 		Parent = notification_inner
 	})
-	
+
 	-- add to registry
 	library:add_to_registry(notification_inner, {
 		['BackgroundColor3'] = 'main',
@@ -1445,16 +1490,16 @@ function library:notification(title, text, duration)
 	library:add_to_registry(progress_bar, {
 		['BackgroundColor3'] = 'n_text'
 	})
-	
+
 	-- functions
 	local t = game.TweenService:Create(notification_outer, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), { Size = u2n(1, 0, 0, 75) })
 	t:Play()
 	t.Completed:Wait()
-	
+
 	local t2 = game.TweenService:Create(progress_bar, TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = u2n(1, -10, 0, 1) })
 	t2:Play()
 	t2.Completed:Wait()
-	
+
 	local t3 = game.TweenService:Create(notification_outer, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), { Size = u2n(1, 0, 0, 0) })
 	t3:Play()
 	t3.Completed:Wait()
