@@ -987,7 +987,7 @@ function library:apply_settings(tab)
 	
 	-- create s_theme stuff
 	for i,v in pairs(library.theme_order) do
-		local btn = s_theme:label({ text = v }):color({ default = library.theme[v], callback = fucntion(val) library:new_theme(v, val) end })
+		local btn = s_theme:label({ text = v }):color({ default = library.theme[v], callback = function(val) library:new_theme(v, val) end })
 		table.insert(theme_stuff, { Table = btn, Name = v })
 	end
 	local reset_button = s_theme:button({ text = 'reset to default', callback = function()
