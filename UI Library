@@ -51,6 +51,20 @@ library.theme = {
 	a_text = c3rgb(255, 255, 255),
 	i_text = c3rgb(150, 150, 150)
 }
+library.theme_order = {
+	'main',
+	'bg',
+
+	'dark_main',
+	'dark_bg',
+    
+    	'outline',
+	'accent',
+
+	'n_text',
+	'a_text',
+	'i_text'
+}
 
 --< functions >--
 
@@ -972,12 +986,9 @@ function library:apply_settings(tab)
 	local theme_stuff = {}
 	
 	-- create s_theme stuff
-	for i,v in pairs(library.theme) do
-		local btn = s_theme:label({ text = i }):color({ default = v, callback = function(val) library:new_theme(i, val) end })
-		table.insert(theme_stuff, {
-			Table = btn,
-			Name = i
-		})
+	for i,v in pairs(library.theme_order) do
+		local btn = s_theme:label({ text = v }):color({ default = library.theme[v], callback = fucntion(val) library:new_theme(v, val) end })
+		table.insert(theme_stuff, { Table = btn, Name = v })
 	end
 	local reset_button = s_theme:button({ text = 'reset to default', callback = function()
 		library:reset_theme()
