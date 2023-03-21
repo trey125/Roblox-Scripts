@@ -987,7 +987,7 @@ function library:apply_settings(tab)
 	end })
 	
 	-- create m_theme stuff
-	m_theme:button({ text = 'unload', function() library:unload() end })
+	m_theme:button({ text = 'unload', callback = function() library:unload() end })
 	m_theme:label({ text = 'unload bind' }):keybind({ bind = 'End', callback = function() library:unload() end })
 	m_theme:label({ text = 'toggle ui bind' }):keybind({ bind = 'RAlt', callback = function() library.menu:toggle() end })
 end
