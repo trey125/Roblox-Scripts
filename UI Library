@@ -125,7 +125,7 @@ function special:keybind(properties)
 	
 	if bind ~= 'none' then
 		if type(bind) == 'string' then
-			if key_word[bind] then keybind_label.Text = '[' .. key_word .. ']' end
+			if key_word[bind] then keybind_label.Text = '[' .. key_word[bind] .. ']' end
 		else
 			if shortened[bind] then keybind_label.Text = '[' .. shortened[bind] .. ']'
 			elseif bind.Name then keybind_label.Text = '[' .. bind.Name .. ']' end
