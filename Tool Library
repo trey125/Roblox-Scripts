@@ -75,10 +75,10 @@ end
 
 function Funcs:Start()
 	pcall(function()
-		Funcs:addConn(_G.Local.l_Player.CharacterAdded, function(char)
+		table.insert(Connections, _G.Local.l_Player.CharacterAdded:Connect(function(char)
 			_G.Local.l_Char = char
 			_G.Local.l_HRP = _G.Local.l_Char:WaitForChild('HumanoidRootPart', 5)
-		end)
+		end))
 	end)
 end
 function Funcs:Stop()
