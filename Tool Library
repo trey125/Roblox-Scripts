@@ -31,28 +31,11 @@ function Funcs:RemoveFromTable(_table, item)
 	end
 end
 
-function Funcs:addConn(conn, func)
-	table.insert(Connections, conn:Connect(func))
-end
-function Funcs:addSignal(object, property, func)
-	table.insert(Connections, object:GetPropertyChangedSignal(property):Connect(func))
-end
-
 function Funcs:Dist(pos1, pos2)
 	return (pos1 - pos2)
 end
 function Funcs:Mag(pos1, pos2)
 	return Funcs:Dist(pos1, pos2).Magnitude
-end
-
-function Funcs:GetAttr(o, a)
-	return o:GetAttribute(a)
-end
-function Funcs:GetAttr_ALL(o)
-	return o:GetAttributes()
-end
-function Funcs:SetAttr(o, a, v)
-	o:SetAttribute(a, v)
 end
 
 function Funcs:W2S(pos)
