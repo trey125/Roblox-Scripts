@@ -18,7 +18,7 @@ _G.Local = {
 	l_HRP = _G.Services.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart', 5),
 	
 	Mouse = _G.Services.Players.LocalPlayer:GetMouse(),
-	Cam = workspace.CurrentCamera,
+	Cam = _G.Services.WS.CurrentCamera,
 }
 Connections = {}
 
