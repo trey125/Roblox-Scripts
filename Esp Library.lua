@@ -76,6 +76,7 @@ function Funcs:New(Name, Prop)
 		t.Outline = Prop.Outline or true
 		t.Center = Prop.Center or true
 		t.Visible = Prop.Visible or false
+		t.Font = Prop.Font or 3
 		table.insert(Drawables, t)
 		return t
 	elseif Name == 'Cham' then
