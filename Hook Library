@@ -1,9 +1,12 @@
+if _G.hooks_enabled then return end
+
 local hook_reg = {
     ['__index'] = {},
     ['__namecall'] = {},
     ['__locked'] = {},
     ['__newindex'] = {}
 }
+_G.hooks_enabled = true
 
 --< hook all _index calls to add .hook and .unhook >--
 local index
