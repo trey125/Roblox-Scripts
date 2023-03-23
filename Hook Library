@@ -27,7 +27,7 @@ index = hookmetamethod(game, '__index', function(s, i, ...)
         elseif fn == 'unhook' or fn == 'removehook' then
             return function(p)
                 __index_hooks[s][p] = {}
-                print(('successfully unhook %s'):format(tostring(s)))
+                print(('successfully unhook %s in %s!'):format(tostring(p), tostring(s)))
             end
         elseif fn == 'lock' then
             return function(p, v)
@@ -38,7 +38,7 @@ index = hookmetamethod(game, '__index', function(s, i, ...)
         elseif fn == 'unlock' then
             return function(p)
                 __locked_hooks[s][p] = {}
-                print(('successfully unlocked %s!'):format(tostring(s)))
+                print(('successfully unlocked %s in %s!'):format(tostring(p), tostring(s)))
             end
         end
     end
