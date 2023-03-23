@@ -1,3 +1,13 @@
+--[[ Documentation
+    -- instance.hook(<string> property, <function/number/string> value)
+    -- instance.unhook(<string> property)
+    -- instance.lock(<string> property, <function/number/string> value)
+    -- instance.unlock(<string> property)
+
+    -- event:hook(<string> type, <function/table> value) -- type = 'FireServer', 'InvokeServer', etc
+    -- event:unhook(<string> type)
+--]]
+
 local hook_reg = {
     ['__index'] = {},
     ['__namecall'] = {},
