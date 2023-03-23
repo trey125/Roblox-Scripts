@@ -1,0 +1,103 @@
+local hook_reg = {
+    ['__index'] = {},
+    ['__namecall'] = {},
+    ['__locked'] = {},
+    ['__newindex'] = {}
+}
+
+--< hook all _index calls to add .hook and .unhook >--
+local index
+index = hookmetamethod(game, '__index', function(s, i, ...)
+    local args = {...}
+    
+    local __index_hooks = hook_reg['__index']
+    local __locked_hooks = hook_reg['__locked']
+    
+    if checkcaller() then
+        local fn = tostring(i) and tostring(i):lower() or ''
+        if fn == 'hook' or fn == 'sethook' then
+            return function(p, v)
+                __index_hooks[s] = { s, p, v }
+                print(('successfully hooked %s! [%s] showing as [%s]'):format(tostring(s), tostring(p), tostring(v)))
+            end
+        elseif fn == 'unhook' or fn == 'removehook' then
+            return function(p)
+                __index_hooks[s] = {}
+                print(('successfully unhook %s'):format(tostring(s)))
+            end
+        elseif fn == 'lock' then
+            return function(p, v)
+                __locked_hooks[s] = { s, p, v }
+                print(('successfully locked %s! [%s] will always be %s'):format(tostring(s), tostring(p), tostring(v)))
+            end
+        elseif fn == 'unlock' then
+            return function(p)
+                __locked_hooks[s] = {}
+                print(('successfully unlocked %s!'):format(tostring(s)))
+            end
+        end
+    end
+    
+    local self_hook = __index_hooks[s]
+    if self_hook and type(self_hook) == 'table' then
+        if self_hook[1] and self_hook[2] and self_hook[3] then
+            if type(self_hook[2]) == 'string' and i == self_hook[2] then
+                return (self_hook[3])
+            end
+        end
+    end
+    
+    return index(s, i, unpack(args))
+end)
+
+--< hook all __newindex calls to add .lock and .unlock >--
+local new_index
+new_index = hookmetamethod(game, '__newindex', function(s, i, v)
+    local __locked_hooks = hook_reg['__locked']
+    local self_lock = __locked_hooks[s]
+    
+    if self_lock and type(self_lock) == 'table' then
+        if self_lock[1] and self_lock[2] and self_lock[3] then
+            if type(self_lock[2]) == 'string' and i == self_lock[2] then
+                v = self_lock[3]
+            end
+        end
+    end
+    
+    return new_index(s, i, v)
+end)
+
+--< hook all __namecall calls to add .hook, .unhook and, .fire >--
+local new_namecall
+new_namecall = hookmetamethod(game, '__namecall', function(s, ...)
+    local args = {...}
+    
+    local i = getnamecallmethod()
+    local __namecall_hooks = hook_reg['__namecall']
+    
+    if checkcaller() then
+        local fn = tostring(i) and tostring(i):lower() or ''
+        if fn == 'hook' or fn == 'sethook' then
+            return function(p, v)
+                __namecall_hooks[s] = { s, p, v }
+            end
+        elseif fn == 'unhook' or 'removehook' then
+            __namecall_hooks[s] = {}
+        end
+    end
+    
+    local self_hook = __namecall_hooks[s]
+    if self_hook and type(self_hook) == 'table' then
+        if self_hook[1] and self_hook[2] and self_hook[3] then
+            if type(self_hook[2]) == 'string' and i == self_hook[2] then
+                if type(self_hook[3]) == 'table' then
+                    return new_namecall(s, unpack(self_hook[3]))
+                elseif type(self_hook[3]) == 'function' then
+                    return self_hook[3](new_namecall, s, ...)
+                end
+            end
+        end
+    end
+    
+    return new_namecall(s, unpack(args))
+end)
