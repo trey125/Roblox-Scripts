@@ -1,4 +1,5 @@
 if _G.hooks_enabled then return end
+_G.hooks_enabled = true
 
 local hook_reg = {
     ['__index'] = {},
@@ -6,7 +7,6 @@ local hook_reg = {
     ['__locked'] = {},
     ['__newindex'] = {}
 }
-_G.hooks_enabled = true
 
 --< hook all _index calls to add .hook and .unhook >--
 local index
@@ -20,6 +20,7 @@ index = hookmetamethod(game, '__index', function(s, i, ...)
         local fn = tostring(i) and tostring(i):lower() or ''
         if fn == 'hook' or fn == 'sethook' then
             return function(p, v)
+                if not __index_hooks[s] then __index_hooks[s] = {} end
                 __index_hooks[s][p] = { s, p, v }
                 print(('successfully hooked %s! [%s] showing as [%s]'):format(tostring(s), tostring(p), tostring(v)))
             end
@@ -30,6 +31,7 @@ index = hookmetamethod(game, '__index', function(s, i, ...)
             end
         elseif fn == 'lock' then
             return function(p, v)
+                if not __locked_hooks[s] then __locked_hooks[s] = {} end
                 __locked_hooks[s][p] = { s, p, v }
                 print(('successfully locked %s! [%s] will always be %s'):format(tostring(s), tostring(p), tostring(v)))
             end
@@ -41,11 +43,12 @@ index = hookmetamethod(game, '__index', function(s, i, ...)
         end
     end
     
-    local self_hook = __index_hooks[s][i]
+    local self_hook = __index_hooks[s] or nil
     if self_hook and type(self_hook) == 'table' then
-        if self_hook[1] and self_hook[2] and self_hook[3] then
-            if type(self_hook[2]) == 'string' and i == self_hook[2] then
-                return (self_hook[3])
+        local hook = __index_hooks[s][i]
+        if hook and hook[1] and hook[2] and hook[3] then
+            if type(hook[2]) == 'string' and i == hook[2] then
+                return hook[3]
             end
         end
     end
@@ -57,12 +60,13 @@ end)
 local new_index
 new_index = hookmetamethod(game, '__newindex', function(s, i, v)
     local __locked_hooks = hook_reg['__locked']
-    local self_lock = __locked_hooks[s][i]
+    local self_hook = __locked_hooks[s] or nil
     
-    if self_lock and type(self_lock) == 'table' then
-        if self_lock[1] and self_lock[2] and self_lock[3] then
-            if type(self_lock[2]) == 'string' and i == self_lock[2] then
-                v = self_lock[3]
+    if self_hook and type(self_hook) == 'table' then
+        local hook = __locked_hooks[s][i]
+        if hook and hook[1] and hook[2] and hook[3] then
+            if type(hook[2]) == 'string' and i == hook[2] then
+                v = hook[3]
             end
         end
     end
@@ -71,6 +75,7 @@ new_index = hookmetamethod(game, '__newindex', function(s, i, v)
 end)
 
 --< hook all __namecall calls to add .hook, .unhook and, .fire >--
+--[[
 local new_namecall
 new_namecall = hookmetamethod(game, '__namecall', function(s, ...)
     local args = {...}
@@ -104,3 +109,6 @@ new_namecall = hookmetamethod(game, '__namecall', function(s, ...)
     
     return new_namecall(s, unpack(args))
 end)
+--]]
+
+print('hooks initialized')
