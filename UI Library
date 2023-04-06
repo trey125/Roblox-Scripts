@@ -821,6 +821,8 @@ function base:dropdown(properties)
 	end
 
 	library:mousedown(dropdown_button_outer, function()
+		if library.ui_open and dropdown_content_outer.Visible == false then return end
+	
 		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
 		library.ui_open = dropdown_content_outer.Visible
 	end, false)
