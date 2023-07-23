@@ -51,20 +51,6 @@ library.theme = {
 	a_text = c3rgb(255, 255, 255),
 	i_text = c3rgb(150, 150, 150)
 }
-library.theme_order = {
-	'main',
-	'bg',
-
-	'dark_main',
-	'dark_bg',
-    
-    	'outline',
-	'accent',
-
-	'n_text',
-	'a_text',
-	'i_text'
-}
 
 --< functions >--
 
@@ -139,8 +125,8 @@ function special:keybind(properties)
 	
 	if bind ~= 'none' then
 		if type(bind) == 'string' then
-			if key_word[bind] then 
-				keybind_label.Text = '[' .. bind .. ']' 
+			if key_word[bind] then
+				keybind_label.Text = '[' .. bind .. ']'
 				bind = key_word[bind]
 			else bind = 'none' end
 		else
@@ -822,7 +808,272 @@ function base:dropdown(properties)
 
 	library:mousedown(dropdown_button_outer, function()
 		if library.ui_open and dropdown_content_outer.Visible == false then return end
+		
+		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
+		library.ui_open = dropdown_content_outer.Visible
+	end, false)
+	library:highlight(dropdown_button_outer, dropdown_button_outer, 'BackgroundColor3', 'accent', 'outline', false)
+
+	-- return
+	dropdown.Instance = dropdown_frame
+	return dropdown
+end
+function base:dropdown_multi(properties)
+	local dropdown = {}
 	
+	local values = properties.values
+	local value_buttons = {}
+	local chosen = properties.default or { '' }
+	local chosen_str = ''
+	
+	for i,v in pairs(chosen) do
+		if chosen_str == '' then
+			chosen_str = chosen_str .. v
+		else
+			chosen_str = chosen_str .. ', ' .. v
+		end
+	end
+	
+	-- create elements
+	local dropdown_frame = library:create('frame', {
+		BackgroundTransparency = 1,
+		Size = u2n(1, 0, 0, 40),
+		Parent = self.container
+	})
+	local dropdown_button_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 0, 0, 20),
+		Size = u2n(1, 0, 0, 18),
+		Parent = dropdown_frame
+	})
+	local dropdown_button_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		Parent = dropdown_button_outer
+	})
+	local dropdown_button_image = library:create('image', {
+		BackgroundTransparency = 1,
+		Position = u2n(1, -20, 0, -2),
+		Size = u2n(0, 20, 0, 20),
+		Image = 'rbxassetid://3926307971',
+		ImageRectOffset = v2n(324, 524),
+		ImageRectSize = v2n(36, 36),
+		Parent = dropdown_button_outer
+	})
+	local dropdown_value = library:create('text', {
+		Position = u2n(0, 3, 0, 0),
+		Size = u2n(1, -6, 0, 15),
+		Text = chosen_str,
+		TextColor3 = library.theme.a_text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = dropdown_button_outer
+	})
+	local dropdown_title = library:create('text', {
+		Size = u2n(1, 0, 0, 15),
+		Text = properties.text,
+		TextColor3 = library.theme.a_text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = dropdown_frame
+	})
+
+	local dropdown_content_outer = library:create('frame', {
+		BackgroundColor3 = library.theme.outline,
+		BorderColor3 = c3rgb(0, 0, 0),
+		Position = u2n(0, 0, 0, 40),
+		Size = u2n(1, 0, 0, (#values * 15) + 4),
+		Visible = false,
+		ZIndex = 2,
+		Parent = dropdown_frame
+	})
+	local dropdown_content_inner = library:create('frame', {
+		BackgroundColor3 = library.theme.dark_main,
+		BorderColor3 = c3rgb(0, 0, 0),
+		BorderMode = Enum.BorderMode.Inset,
+		Position = u2n(0, 1, 0, 1),
+		Size = u2n(1, -2, 1, -2),
+		ZIndex = 99,
+		Parent = dropdown_content_outer
+	})
+	local dropdown_content_layout = library:create('layout', {
+		FillDirection = Enum.FillDirection.Vertical,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = dropdown_content_inner
+	})
+	
+	chosen_str = ''
+	local function createButton(v)
+		local btn = {}
+
+		-- create elements
+		local btn_frame = library:create('frame', {
+			BackgroundTransparency = 1,
+			BackgroundColor3 = library.theme.main,
+			BorderSizePixel = 0,
+			Size = u2n(1, 0, 0, 15),
+			ZIndex = 99,
+			Parent = dropdown_content_inner
+		})
+		local btn_title = library:create('text', {
+			Position = u2n(0, 3, 0, -1),
+			Size = u2n(1, -6, 1, 0),
+			Text = v,
+			TextColor3 = library.theme.i_text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 99,
+			Parent = btn_frame
+		})
+
+		-- add to registry
+		library:add_to_registry(btn_frame, {
+			['BackgroundColor3'] = 'main'
+		})
+		library:add_to_registry(btn_title, {
+			['TextColor3'] = 'i_text'
+		})
+
+		for i2,v2 in pairs(chosen) do
+			if v2 == v then
+				btn_frame.BackgroundTransparency = 0
+
+				btn_title.TextColor3 = library.theme.a_text
+				library.reg[btn_title].Properties['TextColor3'] = 'a_text'
+			end
+		end
+
+		-- functions
+		function btn:Hide()
+			btn_frame.BackgroundTransparency = 1
+
+			btn_title.TextColor3 = library.theme.i_text
+			library.reg[btn_title].Properties['TextColor3'] = 'i_text'
+		end
+		function btn:Show()
+			btn_frame.BackgroundTransparency = 0
+
+			btn_title.TextColor3 = library.theme.a_text
+			library.reg[btn_title].Properties['TextColor3'] = 'a_text'
+		end
+
+		library:mousedown(btn_frame, function()
+			for i,v in pairs(value_buttons) do
+				print('Instance nil: ' .. tostring(v.Instance == nil) .. ' | Children: ' .. #v.Instance:GetChildren())
+				if string.find(chosen_str, v.Instance:FindFirstChild('TextLabel').Text) then 
+					v:Show()
+					break
+				end
+			end
+
+			if btn_frame.BackgroundTransparency == 1 then 
+				btn:Show()
+
+				library:in_table(chosen, v, nil, function(_i) table.insert(chosen, v) end)
+
+				local nText = ''
+				dropdown_value.Text = '...'
+
+
+				for i2, v2 in pairs(chosen) do
+					if nText == '' then
+						nText = nText .. v2
+					else
+						nText = nText .. ', ' .. v2
+					end
+				end
+
+				if library:text_bounds(nText, 14) < dropdown_value.AbsoluteSize.X then dropdown_value.Text = nText end
+			elseif btn_frame.BackgroundTransparency == 0 then
+				btn:Hide()
+
+				local nText = ''
+				dropdown_value.Text = '...'
+				
+				library:in_table(chosen, v, function(_i) table.remove(chosen, _i) end, nil)
+				for i2,v2 in pairs(chosen) do
+					if nText == '' then
+						nText = nText .. v2
+					else
+						nText = nText .. ', ' .. v2
+					end
+				end
+
+				if library:text_bounds(nText, 14) < dropdown_value.AbsoluteSize.X then dropdown_value.Text = nText end
+			end
+
+			if properties.callback then properties.callback(chosen) end
+		end, false)
+
+		-- return
+		btn.Instance = btn_frame
+		value_buttons[v] = btn
+	end
+	for i,v in pairs(values) do
+		createButton(v)
+	end
+	
+	-- add to registry
+	library:add_to_registry(dropdown_button_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(dropdown_button_inner, {
+		['BackgroundColor3'] = 'main'
+	})
+	library:add_to_registry(dropdown_value, {
+		['TextColor3'] = 'a_text'
+	})
+	library:add_to_registry(dropdown_title, {
+		['TextColor3'] = 'a_text'
+	})
+	library:add_to_registry(dropdown_content_outer, {
+		['BackgroundColor3'] = 'outline'
+	})
+	library:add_to_registry(dropdown_content_inner, {
+		['BackgroundColor3'] = 'dark_main'
+	})
+
+	-- functions
+	function dropdown:update(new_properties)
+		if new_properties.callback then properties.callback = new_properties.callback end
+		if new_properties.text then dropdown_title.Text = new_properties.text end
+		if new_properties.value then
+			chosen = new_properties.Value
+			dropdown_value.Text = ''
+			for i,v in pairs(chosen) do
+				if dropdown_value.Text == '' then
+					dropdown_value.Text = dropdown_value.Text .. v
+					chosen_str = chosen_str .. v
+				else
+					dropdown_value.Text = dropdown_value.Text .. ', ' .. v
+					chosen_str = chosen_str .. ', ' .. v
+				end
+			end
+			for i,v in pairs(value_buttons) do
+				if string.find(chosen_str, v.Instance.TextLabel.Text) then v:Show()
+				else v:Hide() end
+			end
+		end
+		if new_properties.values then
+			for i,v in pairs(new_properties.values) do
+				if not value_buttons[v] then createButton(v) end
+			end
+			for i,v in pairs(values) do
+				if not library:in_table(new_properties.values, v, nil, nil) then
+					value_buttons[v].Instance:Destroy()
+					table.remove(value_buttons, i)
+				end
+			end
+			
+			values = new_properties.values
+			dropdown_content_outer.Size = u2n(1, 0, 0, (#values * 15) + 4)
+		end
+	end
+
+	library:mousedown(dropdown_button_outer, function()
+		if library.ui_open and dropdown_content_outer.Visible == false then return end
+
 		dropdown_content_outer.Visible = not dropdown_content_outer.Visible
 		library.ui_open = dropdown_content_outer.Visible
 	end, false)
@@ -988,9 +1239,12 @@ function library:apply_settings(tab)
 	local theme_stuff = {}
 	
 	-- create s_theme stuff
-	for i,v in pairs(library.theme_order) do
-		local btn = s_theme:label({ text = v }):color({ default = library.theme[v], callback = function(val) library:new_theme(v, val) end })
-		table.insert(theme_stuff, { Table = btn, Name = v })
+	for i,v in pairs(library.theme) do
+		local btn = s_theme:label({ text = i }):color({ default = v, callback = function(val) library:update_theme(i, val) end })
+		table.insert(theme_stuff, {
+			Table = btn,
+			Name = i
+		})
 	end
 	local reset_button = s_theme:button({ text = 'reset to default', callback = function()
 		library:reset_theme()
@@ -1000,11 +1254,25 @@ function library:apply_settings(tab)
 	end })
 	
 	-- create m_theme stuff
-	m_theme:button({ text = 'unload', callback = function() library:unload() end })
+	m_theme:button({ text = 'unload', function() library:unload() end })
 	m_theme:label({ text = 'unload bind' }):keybind({ bind = 'End', callback = function() library:unload() end })
 	m_theme:label({ text = 'toggle ui bind' }):keybind({ bind = 'RAlt', callback = function() library.menu:toggle() end })
 end
 
+function library:in_table(Table, ValueToSearch, FoundCallback, NotFoundCallback)
+	local found = false
+	
+	for i,v in pairs(Table) do
+		if v == ValueToSearch then
+			found = true
+			if FoundCallback then FoundCallback(i) end
+			break
+		end
+	end
+	if not found and NotFoundCallback then NotFoundCallback() end
+	
+	return found
+end
 function library:text_bounds(Text, Size)
 	return ts:GetTextSize(Text, Size, Enum.Font.RobotoMono, v2n(1920, 1080)).X
 end
@@ -1304,7 +1572,7 @@ function library:menu(title)
 					Parent = seperator_frame
 				})
 				local seperator_title = library:create('text', {
-					BackgroundTransparency = #properties.text > 0 and 0 or 1,
+					BackgroundTransparency = 0,
 					BackgroundColor3 = library.theme.bg,
 					BorderSizePixel = 0,
 					Position = u2n(.2, 15, 0, -2),
